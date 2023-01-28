@@ -1,29 +1,14 @@
 /**
- * The Forgotten Server - a free and open-source MMORPG server emulator
- * Copyright (C) 2019  Mark Samman <mark.samman@gmail.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- */
+ * Canary - A free and open-source MMORPG server emulator
+ * Copyright (©) 2019-2022 OpenTibiaBR <opentibiabr@outlook.com>
+ * Repository: https://github.com/opentibiabr/canary
+ * License: https://github.com/opentibiabr/canary/blob/main/LICENSE
+ * Contributors: https://github.com/opentibiabr/canary/graphs/contributors
+ * Website: https://docs.opentibiabr.org/
+*/
 
 #ifndef SRC_UTILS_TOOLS_H_
 #define SRC_UTILS_TOOLS_H_
-
-#include <random>
-#include <string>
-#include <regex>
-#include <boost/algorithm/string.hpp>
 
 #include "utils/utils_definitions.hpp"
 #include "declarations.hpp"
@@ -54,8 +39,8 @@ constexpr bool hasBitSet(uint32_t flag, uint32_t flags) {
 }
 
 std::mt19937& getRandomGenerator();
-int32_t uniform_random(int32_t minNumber, int32_t maxNumber);
-int32_t normal_random(int32_t minNumber, int32_t maxNumber);
+int64_t uniform_random(int64_t minNumber, int64_t maxNumber);
+int64_t normal_random(int64_t minNumber, int64_t maxNumber);
 bool boolean_random(double probability = 0.5);
 
 Direction getDirection(const std::string& string);
@@ -66,6 +51,7 @@ std::string getFirstLine(const std::string& str);
 
 std::string formatDate(time_t time);
 std::string formatDateShort(time_t time);
+std::time_t getTimeNow();
 std::string convertIPToString(uint32_t ip);
 
 void trimString(std::string& str);
@@ -113,6 +99,10 @@ int64_t OTSYS_TIME();
 
 SpellGroup_t stringToSpellGroup(const std::string &value);
 
+uint8_t forgeBonus(int32_t number);
+
+std::string formatPrice(std::string price, bool space/* = false*/);
+
 static inline Cipbia_Elementals_t getCipbiaElement(CombatType_t combatType) {
 	switch (combatType) {
 		case COMBAT_PHYSICALDAMAGE: return CIPBIA_ELEMENTAL_PHYSICAL;
@@ -127,6 +117,32 @@ static inline Cipbia_Elementals_t getCipbiaElement(CombatType_t combatType) {
 		case COMBAT_DEATHDAMAGE: return CIPBIA_ELEMENTAL_DEATH;
 		default: return CIPBIA_ELEMENTAL_UNDEFINED;
 	}
+}
+
+/**
+ * @brief Function to convert and ensure value safety
+ * @param ReturnValue type of value to be returned by the function
+ * @param ConvertValue type of value to be converted and passed as an argument to the function
+ * @param convertValue Value to convert and ensure security
+ * @return ReturnValue Value converted and guaranteed to be safe
+*/
+template<typename ReturnValue, typename ConvertValue>
+ReturnValue convertToSafeInteger(ConvertValue convertValue)
+{
+	auto convertSafeValue = std::clamp(static_cast<ReturnValue>(convertValue), (ReturnValue)0, std::numeric_limits<ReturnValue>::max());
+	return convertSafeValue;
+}
+
+/**
+ * @brief Returns the underlying integral value of an enumeration value.
+ * @param EnumClass The enumeration type to be converted.
+ * @param convertValue The enumeration value to be converted.
+ * @return The underlying integral value of the enumeration value.
+*/
+template<typename EnumClass>
+auto getEnumClassNumber(EnumClass& convertValue)
+{
+	return magic_enum::enum_integer(convertValue);
 }
 
 #endif  // SRC_UTILS_TOOLS_H_

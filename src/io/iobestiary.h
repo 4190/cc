@@ -1,33 +1,17 @@
 /**
  * Canary - A free and open-source MMORPG server emulator
- * Copyright (C) 2021 OpenTibiaBR <opentibiabr@outlook.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- */
+ * Copyright (©) 2019-2022 OpenTibiaBR <opentibiabr@outlook.com>
+ * Repository: https://github.com/opentibiabr/canary
+ * License: https://github.com/opentibiabr/canary/blob/main/LICENSE
+ * Contributors: https://github.com/opentibiabr/canary/graphs/contributors
+ * Website: https://docs.opentibiabr.org/
+*/
 
 #ifndef SRC_IO_IOBESTIARY_H_
 #define SRC_IO_IOBESTIARY_H_
 
-#include <map>
-#include <string>
-
 #include "declarations.hpp"
-#include "game/game.h"
 #include "lua/scripts/luascript.h"
-#include "creatures/monsters/monster.h"
-#include "creatures/monsters/monsters.h"
 #include "creatures/players/player.h"
 
 class Game;
@@ -49,6 +33,9 @@ class Charm
 	charmRune_t id = CHARM_NONE;
 	CombatType_t dmgtype = COMBAT_NONE;
 	uint8_t effect = CONST_ME_NONE;
+
+	SoundEffect_t soundImpactEffect = SoundEffect_t::SILENCE;
+	SoundEffect_t soundCastEffect = SoundEffect_t::SILENCE;
 
 	int8_t percent = 0;
 	int8_t chance = 0;
@@ -75,7 +62,7 @@ class IOBestiary
 
 		Charm* getBestiaryCharm(charmRune_t activeCharm, bool force = false);
 		void addBestiaryKill(Player* player, MonsterType* mtype, uint32_t amount = 1);
-		bool parseCharmCombat(Charm* charm, Player* player, Creature* target, int32_t realDamage);
+		bool parseCharmCombat(Charm* charm, Player* player, Creature* target, int64_t realDamage);
 		void addCharmPoints(Player* player, uint16_t amount, bool negative = false);
 		void sendBuyCharmRune(Player* player, charmRune_t runeID, uint8_t action, uint16_t raceid);
 		void setCharmRuneCreature(Player* player, Charm* charm, uint16_t raceid);

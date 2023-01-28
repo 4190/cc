@@ -1,29 +1,18 @@
 /**
- * @file monster.cpp
- *
- * The Forgotten Server - a free and open-source MMORPG server emulator
- * Copyright (C) 2019 Mark Samman <mark.samman@gmail.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- */
+ * Canary - A free and open-source MMORPG server emulator
+ * Copyright (©) 2019-2022 OpenTibiaBR <opentibiabr@outlook.com>
+ * Repository: https://github.com/opentibiabr/canary
+ * License: https://github.com/opentibiabr/canary/blob/main/LICENSE
+ * Contributors: https://github.com/opentibiabr/canary/graphs/contributors
+ * Website: https://docs.opentibiabr.org/
+*/
 
-#include "otpch.h"
+#include "pch.hpp"
 
 #include "creatures/monsters/monster.h"
-#include "game/game.h"
 #include "creatures/combat/spells.h"
+#include "game/game.h"
+#include "game/scheduling/tasks.h"
 #include "lua/creature/events.h"
 
 int32_t Monster::despawnRange;
@@ -51,7 +40,7 @@ Monster::Monster(MonsterType* mType) :
 	float multiplier = g_configManager().getFloat(RATE_MONSTER_HEALTH);
 	health = mType->info.health*multiplier;
 	healthMax = mType->info.healthMax*multiplier;
-	baseSpeed = mType->info.baseSpeed;
+	baseSpeed = mType->getBaseSpeed();
 	internalLight = mType->info.light;
 	hiddenHealth = mType->info.hiddenHealth;
 	targetDistance = mType->info.targetDistance;
@@ -103,7 +92,8 @@ bool Monster::canWalkOnFieldType(CombatType_t combatType) const
 uint32_t Monster::getReflectValue(CombatType_t reflectType) const {
 	auto it = mType->info.reflectMap.find(reflectType);
 	if (it != mType->info.reflectMap.end()) {
-		return it->second;
+		auto convertedSafe = convertToSafeInteger<uint32_t>(it->second);
+		return convertedSafe;
 	}
 	return 0;
 }
@@ -111,7 +101,8 @@ uint32_t Monster::getReflectValue(CombatType_t reflectType) const {
 uint32_t Monster::getHealingCombatValue(CombatType_t healingType) const {
 	auto it = mType->info.healingMap.find(healingType);
 	if (it != mType->info.healingMap.end()) {
-		return it->second;
+		auto convertedSafe = convertToSafeInteger<uint32_t>(it->second);
+		return convertedSafe;
 	}
 	return 0;
 }
@@ -366,12 +357,12 @@ void Monster::removeTarget(Creature* creature)
 
 	auto it = std::find(targetList.begin(), targetList.end(), creature);
 	if (it != targetList.end()) {
-		creature->decrementReferenceCounter();
-		targetList.erase(it);
-
 		if (!master && getFaction() != FACTION_DEFAULT && creature->getPlayer()) {
 			totalPlayersOnScreen--;
 		}
+
+		creature->decrementReferenceCounter();
+		targetList.erase(it);
 	}
 }
 
@@ -480,7 +471,7 @@ bool Monster::isOpponent(const Creature* creature) const
 		if (creature != getMaster()) {
 			return true;
 		}
-	} else if (creature->getPlayer() && creature->getPlayer()->hasFlag(PlayerFlag_IgnoredByMonsters)) {
+	} else if (creature->getPlayer() && creature->getPlayer()->hasFlag(PlayerFlags_t::IgnoredByMonsters)) {
 		return false;
 	} else {
 		if (getFaction() != FACTION_DEFAULT) {
@@ -518,7 +509,7 @@ void Monster::onCreatureLeave(Creature* creature)
 bool Monster::searchTarget(TargetSearchType_t searchType /*= TARGETSEARCH_DEFAULT*/)
 {
 	if (searchType == TARGETSEARCH_DEFAULT) {
-		int32_t rnd = uniform_random(1, 100);
+		auto rnd = static_cast<int32_t>(uniform_random(1, 100));
 
 		searchType = TARGETSEARCH_NEAREST;
 
@@ -601,7 +592,7 @@ bool Monster::searchTarget(TargetSearchType_t searchType /*= TARGETSEARCH_DEFAUL
 				auto it = resultList.begin();
 				getTarget = *it;
 				if (++it != resultList.end()) {
-					int32_t minHp = getTarget->getHealth();
+					int64_t minHp = getTarget->getHealth();
 					do {
 						if ((*it)->getHealth() < minHp) {
 							getTarget = *it;
@@ -622,7 +613,7 @@ bool Monster::searchTarget(TargetSearchType_t searchType /*= TARGETSEARCH_DEFAUL
 				auto it = resultList.begin();
 				getTarget = *it;
 				if (++it != resultList.end()) {
-					int32_t mostDamage = 0;
+					int64_t mostDamage = 0;
 					do {
 						const auto& dmg = damageMap.find((*it)->getID());
 						if (dmg != damageMap.end()) {
@@ -643,7 +634,7 @@ bool Monster::searchTarget(TargetSearchType_t searchType /*= TARGETSEARCH_DEFAUL
 		default: {
 			if (!resultList.empty()) {
 				auto it = resultList.begin();
-				std::advance(it, uniform_random(0, resultList.size() - 1));
+				std::advance(it, uniform_random(0, static_cast<int64_t>(resultList.size() - 1)));
 				return selectTarget(*it);
 			}
 			break;
@@ -678,20 +669,20 @@ void Monster::onFollowCreatureComplete(const Creature* creature)
 	}
 }
 
-BlockType_t Monster::blockHit(Creature* attacker, CombatType_t combatType, int32_t& damage,
+BlockType_t Monster::blockHit(Creature* attacker, CombatType_t combatType, int64_t& damage,
                               bool checkDefense /* = false*/, bool checkArmor /* = false*/, bool /* field = false */)
 {
 	BlockType_t blockType = Creature::blockHit(attacker, combatType, damage, checkDefense, checkArmor);
 
 	if (damage != 0) {
-		int32_t elementMod = 0;
+		int64_t elementMod = 0;
 		auto it = mType->info.elementMap.find(combatType);
 		if (it != mType->info.elementMap.end()) {
 			elementMod = it->second;
 		}
 
 		if (elementMod != 0) {
-			damage = static_cast<int32_t>(std::round(damage * ((100 - elementMod) / 100.)));
+			damage = convertToSafeInteger<int64_t>(damage * ((100 - elementMod) / 100));
 			if (damage <= 0) {
 				damage = 0;
 				blockType = BLOCK_ARMOR;
@@ -873,6 +864,7 @@ void Monster::onThink(uint32_t interval)
 			onThinkTarget(interval);
 			onThinkYell(interval);
 			onThinkDefense(interval);
+			onThinkSound(interval);
 		}
 	}
 }
@@ -886,6 +878,13 @@ void Monster::doAttacking(uint32_t interval)
 	bool updateLook = true;
 	bool resetTicks = interval != 0;
 	attackTicks += interval;
+
+	float forgeAttackBonus = 0;
+	if (monsterForgeClassification > ForgeClassifications_t::FORGE_NORMAL_MONSTER)
+	{
+		uint16_t damageBase = 3;
+		forgeAttackBonus = static_cast<float>(damageBase + 100) / 100.f;
+	}
 
 	const Position& myPos = getPosition();
 	const Position& targetPos = attackedCreature->getPosition();
@@ -909,14 +908,24 @@ void Monster::doAttacking(uint32_t interval)
 				}
 
 				float multiplier;
-				if (maxCombatValue > 0) { //defense
+				if (maxCombatValue > 0) { // Defense
 					multiplier = g_configManager().getFloat(RATE_MONSTER_DEFENSE);
-				} else { //attack
+				} else { // Attack
 					multiplier = g_configManager().getFloat(RATE_MONSTER_ATTACK);
 				}
 
 				minCombatValue = spellBlock.minCombatValue * multiplier;
 				maxCombatValue = spellBlock.maxCombatValue * multiplier;
+
+				if (maxCombatValue <= 0 && forgeAttackBonus > 0) {
+					minCombatValue *= static_cast<int32_t>(forgeAttackBonus);
+					maxCombatValue *= static_cast<int32_t>(forgeAttackBonus);
+				}
+
+				if (!spellBlock.spell) {
+					continue;
+				}
+
 				spellBlock.spell->castSpell(this, attackedCreature);
 
 				if (spellBlock.isMelee) {
@@ -1094,6 +1103,7 @@ void Monster::onThinkDefense(uint32_t interval)
 					summon->setMaster(this, true);
 					g_game().addMagicEffect(getPosition(), CONST_ME_MAGIC_BLUE);
 					g_game().addMagicEffect(summon->getPosition(), CONST_ME_TELEPORT);
+					g_game().sendSingleSoundEffect(summon->getPosition(), SoundEffect_t::MONSTER_SPELL_SUMMON, this);
 				} else {
 					delete summon;
 				}
@@ -1117,7 +1127,7 @@ void Monster::onThinkYell(uint32_t interval)
 		yellTicks = 0;
 
 		if (!mType->info.voiceVector.empty() && (mType->info.yellChance >= static_cast<uint32_t>(uniform_random(1, 100)))) {
-			uint32_t index = uniform_random(0, mType->info.voiceVector.size() - 1);
+			int64_t index = uniform_random(0, static_cast<int64_t>(mType->info.voiceVector.size() - 1));
 			const voiceBlock_t& vb = mType->info.voiceVector[index];
 
 			if (vb.yellText) {
@@ -1125,6 +1135,23 @@ void Monster::onThinkYell(uint32_t interval)
 			} else {
 				g_game().internalCreatureSay(this, TALKTYPE_MONSTER_SAY, vb.text, false);
 			}
+		}
+	}
+}
+
+void Monster::onThinkSound(uint32_t interval)
+{
+	if (mType->info.soundSpeedTicks == 0) {
+		return;
+	}
+
+	soundTicks += interval;
+	if (soundTicks >= mType->info.soundSpeedTicks) {
+		soundTicks = 0;
+
+		if (!mType->info.soundVector.empty() && (mType->info.soundChance >= static_cast<uint32_t>(uniform_random(1, 100)))) {
+			int64_t index = uniform_random(0, static_cast<int64_t>(mType->info.soundVector.size() - 1));
+			g_game().sendSingleSoundEffect(this->getPosition(), mType->info.soundVector[index], this);
 		}
 	}
 }
@@ -1383,7 +1410,7 @@ bool Monster::getDanceStep(const Position& creaturePos, Direction& moveDirection
 
 	if (!dirList.empty()) {
 		std::shuffle(dirList.begin(), dirList.end(), getRandomGenerator());
-		moveDirection = dirList[uniform_random(0, dirList.size() - 1)];
+		moveDirection = dirList[uniform_random(0, static_cast<int64_t>(dirList.size() - 1))];
 		return true;
 	}
 	return false;
@@ -1901,6 +1928,9 @@ bool Monster::canWalkTo(Position pos, Direction moveDirection) const
 
 void Monster::death(Creature*)
 {
+	if (monsterForgeClassification > ForgeClassifications_t::FORGE_NORMAL_MONSTER) {
+		g_game().removeForgeMonster(getID(), monsterForgeClassification, true);
+	}
 	setAttackedCreature(nullptr);
 
 	for (Creature* summon : summons) {
@@ -1912,6 +1942,10 @@ void Monster::death(Creature*)
 	clearTargetList();
 	clearFriendList();
 	onIdleStatus();
+
+	if (mType) {
+		g_game().sendSingleSoundEffect(this->getPosition(), mType->info.deathSound, this);
+	}
 }
 
 Item* Monster::getCorpse(Creature* lastHitCreature, Creature* mostDamageCreature)
@@ -1957,16 +1991,16 @@ bool Monster::isInSpawnRange(const Position& pos) const
 	return true;
 }
 
-bool Monster::getCombatValues(int32_t& min, int32_t& max)
+bool Monster::getCombatValues(int64_t& min, int64_t& max)
 {
 	if (minCombatValue == 0 && maxCombatValue == 0) {
 		return false;
 	}
 
 	float multiplier;
-	if (maxCombatValue > 0) { //defense
+	if (maxCombatValue > 0) { // Defense
 		multiplier = g_configManager().getFloat(RATE_MONSTER_DEFENSE);
-	} else { //attack
+	} else { // Attack
 		multiplier = g_configManager().getFloat(RATE_MONSTER_ATTACK);
 	}
 
@@ -2030,13 +2064,27 @@ void Monster::updateLookDirection()
 			}
 		}
 	}
-
 	g_game().internalCreatureTurn(this, newDir);
 }
 
 void Monster::dropLoot(Container* corpse, Creature*)
 {
 	if (corpse && lootDrop) {
+		// Only fiendish drops sliver
+		if (ForgeClassifications_t classification = getMonsterForgeClassification();
+			// Condition
+			classification == ForgeClassifications_t::FORGE_FIENDISH_MONSTER)
+		{
+			auto minSlivers = g_configManager().getNumber(FORGE_MIN_SLIVERS);
+			auto maxSlivers = g_configManager().getNumber(FORGE_MAX_SLIVERS);
+
+			auto sliverCount = static_cast<uint16_t>(uniform_random(minSlivers, maxSlivers));
+
+			Item *sliver = Item::CreateItem(ITEM_FORGE_SLIVER, sliverCount);
+			if (g_game().internalAddItem(corpse, sliver) != RETURNVALUE_NOERROR) {
+				corpse->internalAddThing(sliver);
+			}
+		}
 		g_events().eventMonsterOnDropLoot(this, corpse);
 	}
 }
@@ -2046,7 +2094,7 @@ void Monster::setNormalCreatureLight()
 	internalLight = mType->info.light;
 }
 
-void Monster::drainHealth(Creature* attacker, int32_t damage)
+void Monster::drainHealth(Creature* attacker, int64_t damage)
 {
 	Creature::drainHealth(attacker, damage);
 
@@ -2060,8 +2108,14 @@ void Monster::drainHealth(Creature* attacker, int32_t damage)
 	}
 }
 
-void Monster::changeHealth(int32_t healthChange, bool sendHealthChange/* = true*/)
+void Monster::changeHealth(int64_t healthChange, bool sendHealthChange/* = true*/)
 {
+	if (mType && !mType->info.soundVector.empty() && mType->info.soundChance >= static_cast<uint32_t>(uniform_random(1, 100))) {
+		auto index = uniform_random(0, mType->info.soundVector.size() - 1);
+		auto convertedSafe = convertToSafeInteger<uint16_t>(index);
+		g_game().sendSingleSoundEffect(this->getPosition(), mType->info.soundVector[convertedSafe], this);
+	}
+
 	//In case a player with ignore flag set attacks the monster
 	setIdle(false);
 	Creature::changeHealth(healthChange, sendHealthChange);
@@ -2119,7 +2173,7 @@ void Monster::getPathSearchParams(const Creature* creature, FindPathParams& fpp)
 			fpp.fullPathSearch = !canUseAttack(getPosition(), creature);
 		}
 	} else if (isFleeing()) {
-		//Distance should be higher than the client view range (Map::maxClientViewportX/Map::maxClientViewportY)
+		// Distance should be higher than the client view range (Map::maxClientViewportX/Map::maxClientViewportY)
 		fpp.maxTargetDist = Map::maxViewportX;
 		fpp.clearSight = false;
 		fpp.keepDistance = true;
@@ -2129,4 +2183,72 @@ void Monster::getPathSearchParams(const Creature* creature, FindPathParams& fpp)
 	} else {
 		fpp.fullPathSearch = !canUseAttack(getPosition(), creature);
 	}
+}
+
+void Monster::configureForgeSystem()
+{
+	if (!canBeForgeMonster()) {
+		return;
+	}
+
+	// Avoid double forge
+	if (monsterForgeClassification == ForgeClassifications_t::FORGE_FIENDISH_MONSTER)
+	{
+		// Set stack
+		setForgeStack(15);
+		// Set icon
+		setMonsterIcon(15, 5);
+		// Update
+		g_game().updateCreatureIcon(this);
+	}
+	else if (monsterForgeClassification == ForgeClassifications_t::FORGE_INFLUENCED_MONSTER)
+	{
+		// Set stack
+		auto stack = static_cast<uint16_t>(normal_random(1, 5));
+		setForgeStack(stack);
+		// Set icon
+		setMonsterIcon(stack, 4);
+		// Update
+		g_game().updateCreatureIcon(this);
+	}
+
+	// Change health based in stacks
+	float percentToIncrement = static_cast<float>((forgeStack * 6) + 100) / 100.f;
+	auto newHealth = static_cast<int32_t>(std::ceil(static_cast<float>(healthMax) * percentToIncrement));
+
+	healthMax = newHealth;
+	health = newHealth;
+
+	// Event to give Dusts
+	const std::string &Eventname = "ForgeSystemMonster";
+	registerCreatureEvent(Eventname);
+
+	g_game().sendUpdateCreature(this);
+}
+
+void Monster::clearFiendishStatus()
+{
+	timeToChangeFiendish = 0;
+	forgeStack = 0;
+	monsterForgeClassification = ForgeClassifications_t::FORGE_NORMAL_MONSTER;
+
+	float multiplier = g_configManager().getFloat(RATE_MONSTER_HEALTH);
+	health = mType->info.health * static_cast<int32_t>(multiplier);
+	healthMax = mType->info.healthMax * static_cast<int32_t>(multiplier);
+
+	// Set icon
+	setMonsterIcon(0, CREATUREICON_NONE);
+	g_game().updateCreatureIcon(this);
+
+	g_game().sendUpdateCreature(this);
+}
+
+void Monster::setMonsterIcon(uint16_t iconcount, uint16_t iconnumber)
+{
+	iconCount = iconcount;
+	iconNumber = iconnumber;
+}
+
+bool Monster::canDropLoot() const {
+	return !mType->info.lootItems.empty();
 }

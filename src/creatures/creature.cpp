@@ -1,23 +1,13 @@
 /**
- * The Forgotten Server - a free and open-source MMORPG server emulator
- * Copyright (C) 2019  Mark Samman <mark.samman@gmail.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- */
+ * Canary - A free and open-source MMORPG server emulator
+ * Copyright (©) 2019-2022 OpenTibiaBR <opentibiabr@outlook.com>
+ * Repository: https://github.com/opentibiabr/canary
+ * License: https://github.com/opentibiabr/canary/blob/main/LICENSE
+ * Contributors: https://github.com/opentibiabr/canary/graphs/contributors
+ * Website: https://docs.opentibiabr.org/
+*/
 
-#include "otpch.h"
+#include "pch.hpp"
 
 #include "creatures/creature.h"
 #include "declarations.hpp"
@@ -49,16 +39,16 @@ Creature::~Creature()
 
 bool Creature::canSee(const Position& myPos, const Position& pos, int32_t viewRangeX, int32_t viewRangeY)
 {
-	if (myPos.z <= 7) {
+	if (myPos.z <= MAP_INIT_SURFACE_LAYER) {
 		//we are on ground level or above (7 -> 0)
 		//view is from 7 -> 0
-		if (pos.z > 7) {
+		if (pos.z > MAP_INIT_SURFACE_LAYER) {
 			return false;
 		}
-	} else if (myPos.z >= 8) {
+	} else if (myPos.z >= MAP_INIT_SURFACE_LAYER + 1) {
 		//we are underground (8 -> 15)
 		//view is +/- 2 from the floor we stand on
-		if (Position::getDistanceZ(myPos, pos) > 2) {
+		if (Position::getDistanceZ(myPos, pos) > MAP_LAYER_VIEW_LIMIT) {
 			return false;
 		}
 	}
@@ -221,7 +211,7 @@ void Creature::onCreatureWalk()
 void Creature::onWalk(Direction& dir)
 {
 	if (hasCondition(CONDITION_DRUNK)) {
-		uint32_t r = uniform_random(0, 20);
+		int64_t r = uniform_random(0, 20);
 		if (r <= DIRECTION_DIAGONAL_MASK) {
 			if (r < DIRECTION_DIAGONAL_MASK) {
 				dir = static_cast<Direction>(r);
@@ -654,7 +644,7 @@ void Creature::onDeath()
 
 	const int64_t timeNow = OTSYS_TIME();
 	const uint32_t inFightTicks = g_configManager().getNumber(PZ_LOCKED);
-	int32_t mostDamage = 0;
+	int64_t mostDamage = 0;
 	std::map<Creature*, uint64_t> experienceMap;
 	for (const auto& it : damageMap) {
 		if (Creature* attacker = g_game().getCreatureByID(it.first)) {
@@ -810,14 +800,14 @@ Item* Creature::getCorpse(Creature*, Creature*)
 	return Item::CreateItem(getLookCorpse());
 }
 
-void Creature::changeHealth(int32_t healthChange, bool sendHealthChange/* = true*/)
+void Creature::changeHealth(int64_t healthChange, bool sendHealthChange/* = true*/)
 {
-	int32_t oldHealth = health;
+	int64_t oldHealth = health;
 
 	if (healthChange > 0) {
-		health += std::min<int32_t>(healthChange, getMaxHealth() - health);
+		health += std::min<int64_t>(healthChange, getMaxHealth() - health);
 	} else {
-		health = std::max<int32_t>(0, health + healthChange);
+		health = std::max<int64_t>(0, health + healthChange);
 	}
 
 	if (sendHealthChange && oldHealth != health) {
@@ -828,16 +818,16 @@ void Creature::changeHealth(int32_t healthChange, bool sendHealthChange/* = true
 	}
 }
 
-void Creature::changeMana(int32_t manaChange)
+void Creature::changeMana(int64_t manaChange)
 {
 	if (manaChange > 0) {
-		mana += std::min<int32_t>(manaChange, getMaxMana() - mana);
+		mana += std::min<int64_t>(manaChange, getMaxMana() - mana);
 	} else {
-		mana = std::max<int32_t>(0, mana + manaChange);
+		mana = convertToSafeInteger<uint32_t>(mana + manaChange);
 	}
 }
 
-void Creature::gainHealth(Creature* healer, int32_t healthGain)
+void Creature::gainHealth(Creature* healer, int64_t healthGain)
 {
 	changeHealth(healthGain);
 	if (healer) {
@@ -845,7 +835,7 @@ void Creature::gainHealth(Creature* healer, int32_t healthGain)
 	}
 }
 
-void Creature::drainHealth(Creature* attacker, int32_t damage)
+void Creature::drainHealth(Creature* attacker, int64_t damage)
 {
 	changeHealth(-damage, false);
 
@@ -854,7 +844,7 @@ void Creature::drainHealth(Creature* attacker, int32_t damage)
 	}
 }
 
-void Creature::drainMana(Creature* attacker, int32_t manaLoss)
+void Creature::drainMana(Creature* attacker, int64_t manaLoss)
 {
 	onAttacked();
 	changeMana(-manaLoss);
@@ -864,7 +854,7 @@ void Creature::drainMana(Creature* attacker, int32_t manaLoss)
 	}
 }
 
-BlockType_t Creature::blockHit(Creature* attacker, CombatType_t combatType, int32_t& damage,
+BlockType_t Creature::blockHit(Creature* attacker, CombatType_t combatType, int64_t& damage,
                                bool checkDefense /* = false */, bool checkArmor /* = false */, bool /* field  = false */)
 {
 	BlockType_t blockType = BLOCK_NONE;
@@ -881,7 +871,7 @@ BlockType_t Creature::blockHit(Creature* attacker, CombatType_t combatType, int3
 		}
 
 		if (checkDefense && hasDefense && canUseDefense) {
-			int32_t defense = getDefense();
+			auto defense = static_cast<int64_t>(getDefense());
 			damage -= uniform_random(defense / 2, defense);
 			if (damage <= 0) {
 				damage = 0;
@@ -891,7 +881,7 @@ BlockType_t Creature::blockHit(Creature* attacker, CombatType_t combatType, int3
 		}
 
 		if (checkArmor) {
-			int32_t armor = getArmor();
+			auto armor = static_cast<int64_t>(getArmor());
 			if (armor > 3) {
 				damage -= uniform_random(armor / 2, armor - (armor % 2 + 1));
 			} else if (armor > 0) {
@@ -1056,7 +1046,7 @@ uint64_t Creature::getGainedExperience(Creature* attacker) const
 	return std::floor(getDamageRatio(attacker) * getLostExperience());
 }
 
-void Creature::addDamagePoints(Creature* attacker, int32_t damagePoints)
+void Creature::addDamagePoints(Creature* attacker, int64_t damagePoints)
 {
 	if (damagePoints <= 0) {
 		return;
@@ -1144,7 +1134,7 @@ void Creature::onAttacked()
 	//
 }
 
-void Creature::onAttackedCreatureDrainHealth(Creature* target, int32_t points)
+void Creature::onAttackedCreatureDrainHealth(Creature* target, int64_t points)
 {
 	target->addDamagePoints(this, points);
 }
@@ -1191,10 +1181,10 @@ void Creature::onGainExperience(uint64_t gainExp, Creature* target)
 			return;
 		}
 
-		TextMessage message(MESSAGE_EXPERIENCE_OTHERS, ucfirst(getNameDescription()) + " gained " + std::to_string(gainExp) + (gainExp != 1 ? " experience points." : " experience point."));
+		TextMessage message(MESSAGE_EXPERIENCE_OTHERS, fmt::format("{} gained {} experience point{}.", ucfirst(getNameDescription()), gainExp, (gainExp != 1 ? "s" : "")));
 		message.position = position;
 		message.primary.color = TEXTCOLOR_WHITE_EXP;
-		message.primary.value = gainExp;
+		message.primary.value = static_cast<int64_t>(std::min<uint64_t>(gainExp, std::numeric_limits<int64_t>::max()));
 
 		for (Creature* spectator : spectators) {
 			spectator->getPlayer()->sendTextMessage(message);
@@ -1435,7 +1425,7 @@ int64_t Creature::getStepDuration() const
 	}
 
 	int32_t stepSpeed = getStepSpeed();
-	uint32_t calculatedStepSpeed = std::max<uint32_t>(floor((Creature::speedA * log((stepSpeed / 2) + Creature::speedB) + Creature::speedC) + 0.5), 1);
+	uint32_t calculatedStepSpeed = std::max<uint32_t>(floor((Creature::speedA * log(stepSpeed + Creature::speedB) + Creature::speedC) + 0.5), 1);
 	calculatedStepSpeed = (stepSpeed > -Creature::speedB) ? calculatedStepSpeed : 1;
 
 	uint32_t groundSpeed = 150;
@@ -1473,6 +1463,24 @@ int64_t Creature::getEventStepTicks(bool onlyDelay) const
 LightInfo Creature::getCreatureLight() const
 {
 	return internalLight;
+}
+
+void Creature::setSpeed(int32_t varSpeedDelta) {
+	// Prevents creatures from not exceeding the maximum allowed speed
+	if (getSpeed() >= PLAYER_MAX_SPEED)
+	{
+		return;
+	}
+
+	int32_t oldSpeed = getSpeed();
+	varSpeed = varSpeedDelta;
+
+	if (getSpeed() <= 0) {
+		stopEventWalk();
+		cancelNextWalk = true;
+	} else if (oldSpeed <= 0 && !listWalkDir.empty()) {
+		addEventWalk();
+	}
 }
 
 void Creature::setCreatureLight(LightInfo lightInfo) {

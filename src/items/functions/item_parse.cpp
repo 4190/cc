@@ -1,25 +1,16 @@
 /**
  * Canary - A free and open-source MMORPG server emulator
- * Copyright (C) 2018-2021 OpenTibiaBR <opentibiabr@outlook.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * Copyright (©) 2019-2022 OpenTibiaBR <opentibiabr@outlook.com>
+ * Repository: https://github.com/opentibiabr/canary
+ * License: https://github.com/opentibiabr/canary/blob/main/LICENSE
+ * Contributors: https://github.com/opentibiabr/canary/graphs/contributors
+ * Website: https://docs.opentibiabr.org/
 */
 
-#include "otpch.h"
+#include "pch.hpp"
 
 #include "items/functions/item_parse.hpp"
+#include "utils/pugicast.h"
 
 void ItemParse::initParse(const std::string& tmpStrValue, pugi::xml_node attributeNode, pugi::xml_attribute keyAttribute, pugi::xml_attribute valueAttribute, ItemType& itemType) {
 	// Parse all item attributes
@@ -110,7 +101,7 @@ void ItemParse::parseRuneSpellName(const std::string& tmpStrValue, pugi::xml_att
 void ItemParse::parseWeight(const std::string& tmpStrValue, pugi::xml_attribute valueAttribute, ItemType& itemType) {
 	std::string stringValue = tmpStrValue;
 	if (stringValue == "weight") {
-		itemType.weight = pugi::cast<uint32_t>(valueAttribute.value());
+		itemType.weight = pugi::cast<int32_t>(valueAttribute.value());
 	}
 }
 
@@ -188,7 +179,7 @@ void ItemParse::parseBlockProjectTile(const std::string& tmpStrValue, pugi::xml_
 void ItemParse::parsePickupable(const std::string& tmpStrValue, pugi::xml_attribute valueAttribute, ItemType& itemType) {
 	std::string stringValue = tmpStrValue;
 	if (stringValue == "allowpickupable" || stringValue == "pickupable") {
-		itemType.allowPickupable = valueAttribute.as_bool();
+		itemType.pickupable = valueAttribute.as_bool();
 	}
 }
 
@@ -632,10 +623,10 @@ CombatType_t ItemParse::parseFieldCombatType(std::string lowerStringValue, pugi:
 }
 
 void ItemParse::parseFieldCombatDamage(ConditionDamage *conditionDamage, std::string stringValue, pugi::xml_node attributeNode) {
-	uint32_t combatTicks = 0;
-	int32_t combatDamage = 0;
-	int32_t combatStart = 0;
-	int32_t combatCount = 1;
+	int32_t combatTicks = 0;
+	int64_t combatDamage = 0;
+	int64_t combatStart = 0;
+	int64_t combatCount = 1;
 
 	for (auto subAttributeNode : attributeNode.children()) {
 		pugi::xml_attribute subKeyAttribute = subAttributeNode.attribute("key");
@@ -650,20 +641,20 @@ void ItemParse::parseFieldCombatDamage(ConditionDamage *conditionDamage, std::st
 
 		stringValue = asLowerCaseString(subKeyAttribute.as_string());
 		if (stringValue == "ticks") {
-			combatTicks = pugi::cast<uint32_t>(subValueAttribute.value());
+			combatTicks = std::max<int32_t>(1, pugi::cast<int32_t>(subValueAttribute.value()));
 		} else if (stringValue == "count") {
-			combatCount = std::max<int32_t>(1, pugi::cast<int32_t>(subValueAttribute.value()));
+			combatCount = std::max<int64_t>(1, pugi::cast<int64_t>(subValueAttribute.value()));
 		} else if (stringValue == "start") {
-			combatStart = std::max<int32_t>(0, pugi::cast<int32_t>(subValueAttribute.value()));
+			combatStart = std::max<int64_t>(0, pugi::cast<int64_t>(subValueAttribute.value()));
 		} else if (stringValue == "damage") {
-			combatDamage = -pugi::cast<int32_t>(subValueAttribute.value());
+			combatDamage = -pugi::cast<int64_t>(subValueAttribute.value());
 			if (combatStart == 0) {
 				conditionDamage->addDamage(combatCount, combatTicks, combatDamage);
 			}
 
-			std::list<int32_t>damageList;
+			std::list<int64_t>damageList;
 			ConditionDamage::generateDamageList(combatDamage, combatStart, damageList);
-			for (int32_t damageValue: damageList) {
+			for (int64_t damageValue: damageList) {
 				conditionDamage->addDamage(1, combatTicks, -damageValue);
 			}
 
@@ -729,26 +720,29 @@ void ItemParse::parseBeds(const std::string& tmpStrValue, pugi::xml_attribute va
 		itemType.bedPartnerDir = getDirection(valueAttribute.as_string());
 	}
 
-	uint16_t value = pugi::cast<uint16_t>(valueAttribute.value());
-	ItemType & other = Item::items.getItemType(value);
 	if (stringValue == "maletransformto") {
-		itemType.transformToOnUse[PLAYERSEX_MALE] = value;
+		uint16_t valueMale = pugi::cast<uint16_t>(valueAttribute.value());
+		ItemType & other = Item::items.getItemType(valueMale);
+		itemType.transformToOnUse[PLAYERSEX_MALE] = valueMale;
 		if (other.transformToFree == 0) {
 			other.transformToFree = itemType.id;
 		}
 
 		if (itemType.transformToOnUse[PLAYERSEX_FEMALE] == 0) {
-			itemType.transformToOnUse[PLAYERSEX_FEMALE] = value;
+			itemType.transformToOnUse[PLAYERSEX_FEMALE] = valueMale;
 		}
 	} else if (stringValue == "femaletransformto") {
-		itemType.transformToOnUse[PLAYERSEX_FEMALE] = value;
+		uint16_t valueFemale = pugi::cast<uint16_t>(valueAttribute.value());
+		ItemType & other = Item::items.getItemType(valueFemale);
+
+		itemType.transformToOnUse[PLAYERSEX_FEMALE] = valueFemale;
 
 		if (other.transformToFree == 0) {
 			other.transformToFree = itemType.id;
 		}
 
 		if (itemType.transformToOnUse[PLAYERSEX_MALE] == 0) {
-			itemType.transformToOnUse[PLAYERSEX_MALE] = value;
+			itemType.transformToOnUse[PLAYERSEX_MALE] = valueFemale;
 		}
 	}
 }

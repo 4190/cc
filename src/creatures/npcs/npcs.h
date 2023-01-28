@@ -1,21 +1,11 @@
 /**
  * Canary - A free and open-source MMORPG server emulator
- * Copyright (C) 2021 OpenTibiaBR <opentibiabr@outlook.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- */
+ * Copyright (©) 2019-2022 OpenTibiaBR <opentibiabr@outlook.com>
+ * Repository: https://github.com/opentibiabr/canary
+ * License: https://github.com/opentibiabr/canary/blob/main/LICENSE
+ * Contributors: https://github.com/opentibiabr/canary/graphs/contributors
+ * Website: https://docs.opentibiabr.org/
+*/
 
 #ifndef SRC_CREATURES_NPCS_NPCS_H_
 #define SRC_CREATURES_NPCS_NPCS_H_
@@ -49,7 +39,7 @@ class NpcType
 
 		uint32_t yellChance = 0;
 		uint32_t yellSpeedTicks = 0;
-		uint32_t baseSpeed = 100;
+		uint32_t baseSpeed = 55;
 		uint32_t walkInterval = 2000;
 
 		int32_t creatureAppearEvent = -1;
@@ -62,8 +52,8 @@ class NpcType
 		int32_t playerSellEvent = -1;
 		int32_t playerLookEvent = -1;
 
-		int32_t health = 100;
-		int32_t healthMax = 100;
+		int64_t health = 100;
+		int64_t healthMax = 100;
 
 		int32_t walkRadius = 10;
 
@@ -71,6 +61,10 @@ class NpcType
 		bool canPushCreatures = false;
 		bool pushable = false;
 		bool floorChange = false;
+ 
+		uint32_t soundChance = 0;
+		uint32_t soundSpeedTicks = 0;
+		std::vector<SoundEffect_t> soundVector;
 
 		std::vector<voiceBlock_t> voiceVector;
 		std::vector<std::string> scripts;
@@ -116,10 +110,8 @@ class Npcs
 		NpcType* getNpcType(const std::string& name, bool create = false);
 
 		// Reset npcs informations on reload
-		void reset() {
-			npcs.clear();
-			scriptInterface.reset();
-		};
+		bool load(bool loadLibs = true, bool loadNpcs = true, bool reloading = false) const;
+		bool reload();
 
 	private:
 		std::unique_ptr<LuaScriptInterface> scriptInterface;

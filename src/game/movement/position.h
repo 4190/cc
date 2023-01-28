@@ -1,26 +1,14 @@
 /**
- * The Forgotten Server - a free and open-source MMORPG server emulator
- * Copyright (C) 2019  Mark Samman <mark.samman@gmail.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- */
+ * Canary - A free and open-source MMORPG server emulator
+ * Copyright (©) 2019-2022 OpenTibiaBR <opentibiabr@outlook.com>
+ * Repository: https://github.com/opentibiabr/canary
+ * License: https://github.com/opentibiabr/canary/blob/main/LICENSE
+ * Contributors: https://github.com/opentibiabr/canary/graphs/contributors
+ * Website: https://docs.opentibiabr.org/
+*/
 
 #ifndef SRC_GAME_MOVEMENT_POSITION_H_
 #define SRC_GAME_MOVEMENT_POSITION_H_
-
-#include <string>
 
 enum Direction : uint8_t {
 	DIRECTION_NORTH = 0,
@@ -80,31 +68,7 @@ struct Position
 	uint8_t z = 0;
 
 	bool operator<(const Position& p) const {
-		if (z < p.z) {
-			return true;
-		}
-
-		if (z > p.z) {
-			return false;
-		}
-
-		if (y < p.y) {
-			return true;
-		}
-
-		if (y > p.y) {
-			return false;
-		}
-
-		if (x < p.x) {
-			return true;
-		}
-
-		if (x > p.x) {
-			return false;
-		}
-
-		return false;
+		return (z < p.z) || (z == p.z && y < p.y) || (z == p.z && y == p.y && x < p.x);
 	}
 
 	bool operator>(const Position& p) const {
@@ -131,9 +95,9 @@ struct Position
 		std::string str;
 		return str.append("( ")
                   .append(std::to_string(getX()))
-                  .append(" / ")
+                  .append(", ")
                   .append(std::to_string(getY()))
-                  .append(" / ")
+                  .append(", ")
                   .append(std::to_string(getZ()))
                   .append(" )");
 	}

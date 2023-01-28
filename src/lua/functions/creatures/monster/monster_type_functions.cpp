@@ -1,30 +1,19 @@
 /**
  * Canary - A free and open-source MMORPG server emulator
- * Copyright (C) 2021 OpenTibiaBR <opentibiabr@outlook.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- */
+ * Copyright (©) 2019-2022 OpenTibiaBR <opentibiabr@outlook.com>
+ * Repository: https://github.com/opentibiabr/canary
+ * License: https://github.com/opentibiabr/canary/blob/main/LICENSE
+ * Contributors: https://github.com/opentibiabr/canary/graphs/contributors
+ * Website: https://docs.opentibiabr.org/
+*/
 
-#include "otpch.h"
+#include "pch.hpp"
 
 #include "creatures/combat/spells.h"
 #include "creatures/monsters/monsters.h"
 #include "game/game.h"
 #include "lua/functions/creatures/monster/monster_type_functions.hpp"
 #include "lua/scripts/scripts.h"
-
 
 void MonsterTypeFunctions::createMonsterTypeLootLuaTable(lua_State* L, const std::vector<LootBlock>& lootList) {
 	lua_createtable(L, lootList.size(), 0);
@@ -228,6 +217,24 @@ int MonsterTypeFunctions::luaMonsterTypeIsBlockable(lua_State* L) {
 	return 1;
 }
 
+int MonsterTypeFunctions::luaMonsterTypeIsForgeCreature(lua_State* L) {
+	// get: monsterType:isForgeCreature() set: monsterType:isForgeCreature(bool)
+	MonsterType* monsterType = getUserdata<MonsterType>(L, 1);
+	if (!monsterType) {
+		pushBoolean(L, false);
+		reportErrorFunc(getErrorDesc(LUA_ERROR_MONSTER_TYPE_NOT_FOUND));
+		return 0;
+	}
+
+	if (lua_gettop(L) == 1) {
+		pushBoolean(L, monsterType->info.isForgeCreature);
+	} else {
+		monsterType->info.isForgeCreature = getBoolean(L, 2);
+		pushBoolean(L, true);
+	}
+	return 1;
+}
+
 int MonsterTypeFunctions::luaMonsterTypeCanSpawn(lua_State* L) {
 	// monsterType:canSpawn(pos)
 	MonsterType* monsterType = getUserdata<MonsterType>(L, 1);
@@ -321,9 +328,9 @@ int MonsterTypeFunctions::luaMonsterTypeHealth(lua_State* L) {
 	MonsterType* monsterType = getUserdata<MonsterType>(L, 1);
 	if (monsterType) {
 		if (lua_gettop(L) == 1) {
-			lua_pushnumber(L, monsterType->info.health);
+			lua_pushnumber(L, static_cast<lua_Number>(monsterType->info.health));
 		} else {
-			monsterType->info.health = getNumber<int32_t>(L, 2);
+			monsterType->info.health = getNumber<int64_t>(L, 2);
 			pushBoolean(L, true);
 		}
 	} else {
@@ -337,9 +344,9 @@ int MonsterTypeFunctions::luaMonsterTypeMaxHealth(lua_State* L) {
 	MonsterType* monsterType = getUserdata<MonsterType>(L, 1);
 	if (monsterType) {
 		if (lua_gettop(L) == 1) {
-			lua_pushnumber(L, monsterType->info.healthMax);
+			lua_pushnumber(L, static_cast<lua_Number>(monsterType->info.healthMax));
 		} else {
-			monsterType->info.healthMax = getNumber<int32_t>(L, 2);
+			monsterType->info.healthMax = getNumber<int64_t>(L, 2);
 			pushBoolean(L, true);
 		}
 	} else {
@@ -855,7 +862,7 @@ int MonsterTypeFunctions::luaMonsterTypeAddElement(lua_State* L) {
 	MonsterType* monsterType = getUserdata<MonsterType>(L, 1);
 	if (monsterType) {
 		CombatType_t element = getNumber<CombatType_t>(L, 2);
-		monsterType->info.elementMap[element] = getNumber<int32_t>(L, 3);
+		monsterType->info.elementMap[element] = getNumber<int64_t>(L, 3);
 		pushBoolean(L, true);
 	} else {
 		lua_pushnil(L);
@@ -868,7 +875,7 @@ int MonsterTypeFunctions::luaMonsterTypeAddReflect(lua_State* L) {
 	MonsterType* monsterType = getUserdata<MonsterType>(L, 1);
 	if (monsterType) {
 		CombatType_t element = getNumber<CombatType_t>(L, 2);
-		monsterType->info.reflectMap[element] = getNumber<int32_t>(L, 3);
+		monsterType->info.reflectMap[element] = getNumber<int64_t>(L, 3);
 		pushBoolean(L, true);
 	} else {
 		lua_pushnil(L);
@@ -881,7 +888,7 @@ int MonsterTypeFunctions::luaMonsterTypeAddHealing(lua_State* L) {
 	MonsterType* monsterType = getUserdata<MonsterType>(L, 1);
 	if (monsterType) {
 		CombatType_t element = getNumber<CombatType_t>(L, 2);
-		monsterType->info.healingMap[element] = getNumber<int32_t>(L, 3);
+		monsterType->info.healingMap[element] = getNumber<int64_t>(L, 3);
 		pushBoolean(L, true);
 	} else {
 		lua_pushnil(L);
@@ -899,8 +906,8 @@ int MonsterTypeFunctions::luaMonsterTypeGetElementList(lua_State* L) {
 
 	lua_createtable(L, monsterType->info.elementMap.size(), 0);
 	for (const auto& elementEntry : monsterType->info.elementMap) {
-		lua_pushnumber(L, elementEntry.second);
-		lua_rawseti(L, -2, elementEntry.first);
+		lua_pushnumber(L, static_cast<lua_Number>(elementEntry.second));
+		lua_rawseti(L, -2, static_cast<int>(elementEntry.first));
 	}
 	return 1;
 }
@@ -1204,13 +1211,13 @@ int MonsterTypeFunctions::luaMonsterTypeManaCost(lua_State* L) {
 }
 
 int MonsterTypeFunctions::luaMonsterTypeBaseSpeed(lua_State* L) {
-	// monsterType:getBaseSpeed()
+	// monsterType:baseSpeed()
 	MonsterType* monsterType = getUserdata<MonsterType>(L, 1);
 	if (monsterType) {
 		if (lua_gettop(L) == 1) {
-			lua_pushnumber(L, monsterType->info.baseSpeed);
+			lua_pushnumber(L, monsterType->getBaseSpeed());
 		} else {
-			monsterType->info.baseSpeed = getNumber<uint32_t>(L, 2);
+			monsterType->setBaseSpeed(getNumber<uint16_t>(L, 2));
 			pushBoolean(L, true);
 		}
 	} else {
@@ -1483,6 +1490,93 @@ int MonsterTypeFunctions::luaMonsterTypeRespawnTypeIsUnderground(lua_State* L) {
 		}
 	} else {
 		lua_pushnil(L);
+	}
+	return 1;
+}
+
+int MonsterTypeFunctions::luaMonsterTypeSoundChance(lua_State* L) {
+	// get: monsterType:soundChance() set: monsterType:soundChance(chance)
+	MonsterType* monsterType = getUserdata<MonsterType>(L, 1);
+	if (!monsterType) {
+		reportErrorFunc(getErrorDesc(LUA_ERROR_CREATURE_NOT_FOUND));
+		pushBoolean(L, false);
+		return 1;
+	}
+
+	if (lua_gettop(L) == 1) {
+		lua_pushnumber(L, monsterType->info.soundChance);
+	} else {
+		monsterType->info.soundChance = getNumber<uint32_t>(L, 2);
+		pushBoolean(L, true);
+	}
+	return 1;
+}
+
+int MonsterTypeFunctions::luaMonsterTypeSoundSpeedTicks(lua_State* L) {
+	// get: monsterType:soundSpeedTicks() set: monsterType:soundSpeedTicks(ticks)
+	MonsterType* monsterType = getUserdata<MonsterType>(L, 1);
+	if (!monsterType) {
+		reportErrorFunc(getErrorDesc(LUA_ERROR_CREATURE_NOT_FOUND));
+		pushBoolean(L, false);
+		return 1;
+	}
+
+	if (lua_gettop(L) == 1) {
+		lua_pushnumber(L, monsterType->info.soundSpeedTicks);
+	} else {
+		monsterType->info.soundSpeedTicks = getNumber<uint32_t>(L, 2);
+		pushBoolean(L, true);
+	}
+	return 1;
+}
+
+int MonsterTypeFunctions::luaMonsterTypeAddSound(lua_State* L) {
+	// monsterType:addSound(soundId)
+	MonsterType* monsterType = getUserdata<MonsterType>(L, 1);
+	if (!monsterType) {
+		reportErrorFunc(getErrorDesc(LUA_ERROR_CREATURE_NOT_FOUND));
+		pushBoolean(L, false);
+		return 1;
+	}
+
+	monsterType->info.soundVector.push_back(getNumber<SoundEffect_t>(L, 2));
+	pushBoolean(L, true);
+	return 1;
+}
+
+int MonsterTypeFunctions::luaMonsterTypeGetSounds(lua_State* L) {
+	// monsterType:getSounds()
+	const MonsterType* monsterType = getUserdata<MonsterType>(L, 1);
+	if (!monsterType) {
+		lua_pushnil(L);
+		return 1;
+	}
+
+	int index = 0;
+	lua_createtable(L, static_cast<int>(monsterType->info.soundVector.size()), 0);
+	for (const auto& sound : monsterType->info.soundVector) {
+		++index;
+		lua_createtable(L, 0, 1);
+		lua_pushnumber(L, static_cast<lua_Number>(getEnumClassNumber(sound)));
+		lua_rawseti(L, -2, index);
+	}
+	return 1;
+}
+
+int MonsterTypeFunctions::luaMonsterTypedeathSound(lua_State* L) {
+	// get: monsterType:deathSound() set: monsterType:deathSound(sound)
+	MonsterType* monsterType = getUserdata<MonsterType>(L, 1);
+	if (!monsterType) {
+		reportErrorFunc(getErrorDesc(LUA_ERROR_CREATURE_NOT_FOUND));
+		pushBoolean(L, false);
+		return 1;
+	}
+
+	if (lua_gettop(L) == 1) {
+		lua_pushnumber(L, static_cast<lua_Number>(getEnumClassNumber(monsterType->info.deathSound)));
+	} else {
+		monsterType->info.deathSound = getNumber<SoundEffect_t>(L, 2);
+		pushBoolean(L, true);
 	}
 	return 1;
 }

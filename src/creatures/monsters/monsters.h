@@ -1,21 +1,11 @@
 /**
- * The Forgotten Server - a free and open-source MMORPG server emulator
- * Copyright (C) 2019  Mark Samman <mark.samman@gmail.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- */
+ * Canary - A free and open-source MMORPG server emulator
+ * Copyright (©) 2019-2022 OpenTibiaBR <opentibiabr@outlook.com>
+ * Repository: https://github.com/opentibiabr/canary
+ * License: https://github.com/opentibiabr/canary/blob/main/LICENSE
+ * Contributors: https://github.com/opentibiabr/canary/graphs/contributors
+ * Website: https://docs.opentibiabr.org/
+*/
 
 #ifndef SRC_CREATURES_MONSTERS_MONSTERS_H_
 #define SRC_CREATURES_MONSTERS_MONSTERS_H_
@@ -60,6 +50,9 @@ struct spellBlock_t {
 	int32_t maxCombatValue = 0;
 	bool combatSpell = false;
 	bool isMelee = false;
+
+	SoundEffect_t soundImpactEffect = SoundEffect_t::SILENCE;
+	SoundEffect_t soundCastEffect = SoundEffect_t::SILENCE;
 };
 
 class MonsterType
@@ -67,9 +60,9 @@ class MonsterType
 	struct MonsterInfo {
 		LuaScriptInterface* scriptInterface;
 
-		std::map<CombatType_t, int32_t> elementMap;
-		std::map<CombatType_t, int32_t> reflectMap;
-		std::map<CombatType_t, int32_t> healingMap;
+		std::map<CombatType_t, int64_t> elementMap;
+		std::map<CombatType_t, int64_t> reflectMap;
+		std::map<CombatType_t, int64_t> healingMap;
 
 		std::vector<voiceBlock_t> voiceVector;
 
@@ -86,6 +79,7 @@ class MonsterType
 
 		LightInfo light = {};
 		uint16_t lookcorpse = 0;
+		uint16_t baseSpeed = 110;
 
 		uint64_t experience = 0;
 
@@ -97,7 +91,6 @@ class MonsterType
 		uint32_t changeTargetSpeed = 0;
 		uint32_t conditionImmunities = 0;
 		uint32_t damageImmunities = 0;
-		uint32_t baseSpeed = 200;
 
 		// Bestiary
 		uint8_t bestiaryOccurrence = 0;
@@ -111,6 +104,11 @@ class MonsterType
 		std::string bestiaryClass; // String (addString)
 		BestiaryType_t bestiaryRace = BESTY_RACE_NONE; // Number (addByte)
 
+		uint32_t soundChance = 0;
+		uint32_t soundSpeedTicks = 0;
+		std::vector<SoundEffect_t> soundVector;
+		SoundEffect_t deathSound = SoundEffect_t::SILENCE;
+
 		int32_t creatureAppearEvent = -1;
 		int32_t creatureDisappearEvent = -1;
 		int32_t creatureMoveEvent = -1;
@@ -118,8 +116,8 @@ class MonsterType
 		int32_t thinkEvent = -1;
 		int32_t targetDistance = 1;
 		int32_t runAwayHealth = 0;
-		int32_t health = 100;
-		int32_t healthMax = 100;
+		int64_t health = 100;
+		int64_t healthMax = 100;
 		int32_t changeTargetChance = 0;
 		int32_t defense = 0;
 		int32_t armor = 0;
@@ -148,6 +146,7 @@ class MonsterType
 		bool canWalkOnEnergy = true;
 		bool canWalkOnFire = true;
 		bool canWalkOnPoison = true;
+		bool isForgeCreature = true;
 
 		MonstersEvent_t eventType = MONSTERS_EVENT_NONE;
 	};
@@ -167,6 +166,14 @@ class MonsterType
 		std::string nameDescription;
 
 		MonsterInfo info;
+
+		uint16_t getBaseSpeed() const {
+			return info.baseSpeed;
+		}
+
+		void setBaseSpeed(const uint16_t initBaseSpeed) {
+			info.baseSpeed = initBaseSpeed;
+		}
 
 		void loadLoot(MonsterType* monsterType, LootBlock lootblock);
 
@@ -217,6 +224,9 @@ class MonsterSpell
 		MagicEffectClasses effect = CONST_ME_NONE;
 		ConditionType_t conditionType = CONDITION_NONE;
 		CombatType_t combatType = COMBAT_UNDEFINEDDAMAGE;
+
+		SoundEffect_t soundImpactEffect = SoundEffect_t::SILENCE;
+		SoundEffect_t soundCastEffect = SoundEffect_t::SILENCE;
 };
 
 class Monsters
@@ -234,12 +244,6 @@ class Monsters
 			return instance;
 		}
 
-		bool loadFromXml(bool reloading = false);
-		bool isLoaded() const {
-			return loaded;
-		}
-		bool reload();
-
 		MonsterType* getMonsterType(const std::string& name);
 		MonsterType* getMonsterTypeByRaceId(uint16_t thisrace);
 		void addMonsterType(const std::string& name, MonsterType* mType);
@@ -251,16 +255,8 @@ class Monsters
 	private:
 		ConditionDamage* getDamageCondition(ConditionType_t conditionType,
 											int32_t maxDamage, int32_t minDamage, int32_t startDamage, uint32_t tickInterval);
-		bool deserializeSpell(const pugi::xml_node& node, spellBlock_t& sb, const std::string& description = "");
 
 		MonsterType* loadMonster(const std::string& file, const std::string& monsterName, bool reloading = false);
-
-		void loadLootContainer(const pugi::xml_node& node, LootBlock&);
-		bool loadLootItem(const pugi::xml_node& node, LootBlock&);
-
-		std::map<std::string, std::string> unloadedMonsters;
-
-		bool loaded = false;
 };
 
 constexpr auto g_monsters = &Monsters::getInstance;

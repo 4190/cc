@@ -1,29 +1,18 @@
 /**
- * The Forgotten Server - a free and open-source MMORPG server emulator
- * Copyright (C) 2019  Mark Samman <mark.samman@gmail.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- */
+ * Canary - A free and open-source MMORPG server emulator
+ * Copyright (©) 2019-2022 OpenTibiaBR <opentibiabr@outlook.com>
+ * Repository: https://github.com/opentibiabr/canary
+ * License: https://github.com/opentibiabr/canary/blob/main/LICENSE
+ * Contributors: https://github.com/opentibiabr/canary/graphs/contributors
+ * Website: https://docs.opentibiabr.org/
+*/
 
-#include "otpch.h"
+#include "pch.hpp"
 
 #include "items/bed.h"
 #include "game/game.h"
 #include "io/iologindata.h"
 #include "game/scheduling/scheduler.h"
-
 
 BedItem::BedItem(uint16_t id) : Item(id)
 {
@@ -221,8 +210,8 @@ void BedItem::regeneratePlayer(Player* player) const
 	if (condition != nullptr) {
 		uint32_t regen;
 		if (condition->getTicks() != -1) {
-			regen = std::min<int32_t>((condition->getTicks() / 1000), sleptTime) / 30; // RATE_HEALTH_REGEN_SPEED and RATE_MANA_REGEN_SPEED?
-			const int32_t newRegenTicks = condition->getTicks() - (regen * 30000);
+			regen = convertToSafeInteger<uint32_t>(std::min<int64_t>((condition->getTicks() / (int64_t)1000), (int64_t)sleptTime) / 30); // RATE_HEALTH_REGEN_SPEED and RATE_MANA_REGEN_SPEED?
+			const int64_t newRegenTicks = condition->getTicks() - (regen * 30000);
 			if (newRegenTicks <= 0) {
 				player->removeCondition(condition);
 			} else {

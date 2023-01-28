@@ -1,13 +1,16 @@
-#include "otpch.h"
+/**
+ * Canary - A free and open-source MMORPG server emulator
+ * Copyright (©) 2019-2022 OpenTibiaBR <opentibiabr@outlook.com>
+ * Repository: https://github.com/opentibiabr/canary
+ * License: https://github.com/opentibiabr/canary/blob/main/LICENSE
+ * Contributors: https://github.com/opentibiabr/canary/graphs/contributors
+ * Website: https://docs.opentibiabr.org/
+*/
+
+#include "pch.hpp"
 
 #include "server/network/webhook/webhook.h"
-
-#include <curl/curl.h>
-#include <json/json.h>
-
-#include <ctime>
-#include <iostream>
-#include <memory>
+#include "config/configmanager.h"
 
 // Tread no further, adventurer!
 // Go back while you still can.
@@ -117,6 +120,7 @@ static int webhook_send_message_(const char *url, const char *payload, std::stri
 	}
 
 	curl_easy_setopt(curl, CURLOPT_URL, url);
+	curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
 	curl_easy_setopt(curl, CURLOPT_POST, 1L);
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, reinterpret_cast<void *>(&response_body));
@@ -130,7 +134,7 @@ static int webhook_send_message_(const char *url, const char *payload, std::stri
 		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
 	} else {
 		SPDLOG_ERROR("Failed to send webhook message with the error: {}",
-                     curl_easy_strerror(res));
+						curl_easy_strerror(res));
 	}
 
 	curl_easy_cleanup(curl);

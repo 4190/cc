@@ -1,25 +1,13 @@
 /**
  * Canary - A free and open-source MMORPG server emulator
- * Copyright (C) 2021 OpenTibiaBR <opentibiabr@outlook.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- */
+ * Copyright (©) 2019-2022 OpenTibiaBR <opentibiabr@outlook.com>
+ * Repository: https://github.com/opentibiabr/canary
+ * License: https://github.com/opentibiabr/canary/blob/main/LICENSE
+ * Contributors: https://github.com/opentibiabr/canary/graphs/contributors
+ * Website: https://docs.opentibiabr.org/
+*/
 
-#include "otpch.h"
-
-#include <boost/range/adaptor/reversed.hpp>
+#include "pch.hpp"
 
 #include "creatures/interactions/chat.h"
 #include "game/game.h"
@@ -309,7 +297,7 @@ int GlobalFunctions::luaDoAreaCombatHealth(lua_State* L) {
 		CombatDamage damage;
 		damage.origin = getNumber<CombatOrigin>(L, 8, ORIGIN_SPELL);
 		damage.primary.type = combatType;
-		damage.primary.value = normal_random(getNumber<int32_t>(L, 6), getNumber<int32_t>(L, 5));
+		damage.primary.value = normal_random(getNumber<int64_t>(L, 6), getNumber<int64_t>(L, 5));
 
 		Combat::doCombatHealth(creature, getPosition(L, 3), area, damage, params);
 		pushBoolean(L, true);
@@ -345,7 +333,7 @@ int GlobalFunctions::luaDoTargetCombatHealth(lua_State* L) {
 	CombatDamage damage;
 	damage.origin = getNumber<CombatOrigin>(L, 7, ORIGIN_SPELL);
 	damage.primary.type = combatType;
-	damage.primary.value = normal_random(getNumber<int32_t>(L, 4), getNumber<int32_t>(L, 5));
+	damage.primary.value = normal_random(getNumber<int64_t>(L, 4), getNumber<int64_t>(L, 5));
 
 	// Check if it's a healing then we sould add the non-aggresive tag
 	if (combatType == COMBAT_HEALING ||
@@ -376,7 +364,7 @@ int GlobalFunctions::luaDoAreaCombatMana(lua_State* L) {
 		CombatDamage damage;
 		damage.origin = getNumber<CombatOrigin>(L, 7, ORIGIN_SPELL);
 		damage.primary.type = COMBAT_MANADRAIN;
-		damage.primary.value = normal_random(getNumber<int32_t>(L, 4), getNumber<int32_t>(L, 5));
+		damage.primary.value = normal_random(getNumber<int64_t>(L, 4), getNumber<int64_t>(L, 5));
 
 		Position pos = getPosition(L, 2);
 		Combat::doCombatMana(creature, pos, area, damage, params);
@@ -410,7 +398,7 @@ int GlobalFunctions::luaDoTargetCombatMana(lua_State* L) {
 	CombatDamage damage;
 	damage.origin = getNumber<CombatOrigin>(L, 6, ORIGIN_SPELL);
 	damage.primary.type = COMBAT_MANADRAIN;
-	damage.primary.value = normal_random(getNumber<int32_t>(L, 3), getNumber<int32_t>(L, 4));
+	damage.primary.value = normal_random(getNumber<int64_t>(L, 3), getNumber<int64_t>(L, 4));
 
 	Combat::doCombatMana(creature, target, damage, params);
 	pushBoolean(L, true);
