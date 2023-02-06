@@ -276,29 +276,6 @@ class Item : virtual public Thing, public ItemProperties
 
 		SoundEffect_t getMovementSound(Cylinder* toCylinder) const;
 
-		const std::string& getStrAttr(ItemAttrTypes type) const {
-			if (!attributes) {
-				return ItemAttributes::emptyString;
-			}
-			return attributes->getStrAttr(type);
-		}
-		void setStrAttr(ItemAttrTypes type, const std::string& value) {
-			getAttributes()->setStrAttr(type, value);
-		}
-
-		int64_t getIntAttr(ItemAttrTypes type) const {
-			if (!attributes) {
-				return 0;
-			}
-			return attributes->getIntAttr(type);
-		}
-		void setIntAttr(ItemAttrTypes type, int64_t value) {
-			getAttributes()->setIntAttr(type, value);
-		}
-		void increaseIntAttr(ItemAttrTypes type, int64_t value) {
-			getAttributes()->increaseIntAttr(type, value);
-		}
-
 		void setIsLootTrackeable(bool value) {
 			isLootTrackeable = value;
 		}
