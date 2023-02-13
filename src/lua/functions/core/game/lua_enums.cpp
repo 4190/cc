@@ -5,31 +5,35 @@
  * License: https://github.com/opentibiabr/canary/blob/main/LICENSE
  * Contributors: https://github.com/opentibiabr/canary/graphs/contributors
  * Website: https://docs.opentibiabr.org/
-*/
+ */
 
 #include "pch.hpp"
-
-#include "config/configmanager.h"
 
 #include "lua/functions/core/game/lua_enums.hpp"
 
 #include "creatures/players/account/account.hpp"
+#include "io/io_bosstiary.hpp"
+#include "config/configmanager.h"
 #include "creatures/creature.h"
 #include "lua/creature/creatureevent.h"
 #include "declarations.hpp"
 #include "game/functions/game_reload.hpp"
 #include "game/game.h"
 
-#define registerEnumClass(luaState, enumClassType) { \
-	auto number = magic_enum::enum_integer(enumClassType); \
-	auto name = magic_enum::enum_name(enumClassType).data(); \
-	registerGlobalVariable(luaState, name, number); \
-} void(0)
+#define registerEnumClass(luaState, enumClassType)               \
+	{                                                            \
+		auto number = magic_enum::enum_integer(enumClassType);   \
+		auto name = magic_enum::enum_name(enumClassType).data(); \
+		registerGlobalVariable(luaState, name, number);          \
+	}                                                            \
+	void(0)
 
-#define registerEnum(L, value) { \
-	std::string enumName = #value; \
-	registerGlobalVariable(L, enumName.substr(enumName.find_last_of(':') + 1), value); \
-} void(0)
+#define registerEnum(L, value)                                                             \
+	{                                                                                      \
+		std::string enumName = #value;                                                     \
+		registerGlobalVariable(L, enumName.substr(enumName.find_last_of(':') + 1), value); \
+	}                                                                                      \
+	void(0)
 
 void LuaEnums::init(lua_State* L) {
 	initOthersEnums(L);
@@ -74,6 +78,7 @@ void LuaEnums::init(lua_State* L) {
 	initCreaturesEventEnums(L);
 	initForgeEnums(L);
 	initWebhookEnums(L);
+	initBosstiaryEnums(L);
 	initSoundEnums(L);
 }
 
@@ -122,7 +127,7 @@ void LuaEnums::initOthersEnums(lua_State* L) {
 	registerEnum(L, ORIGIN_SPELL);
 	registerEnum(L, ORIGIN_MELEE);
 	registerEnum(L, ORIGIN_RANGED);
-	
+
 	registerEnum(L, PLAYERSEX_FEMALE);
 	registerEnum(L, PLAYERSEX_MALE);
 
@@ -952,6 +957,7 @@ void LuaEnums::initSpeechBubbleEnums(lua_State* L) {
 	registerEnum(L, SPEECHBUBBLE_TRADE);
 	registerEnum(L, SPEECHBUBBLE_QUEST);
 	registerEnum(L, SPEECHBUBBLE_QUESTTRADER);
+	registerEnum(L, SPEECHBUBBLE_HIRELING);
 }
 
 // Use with player:addMapMark
@@ -1102,7 +1108,12 @@ void LuaEnums::initWebhookEnums(lua_State* L) {
 	registerEnum(L, WEBHOOK_COLOR_RAID);
 }
 
-// Webhook default colors
+void LuaEnums::initBosstiaryEnums(lua_State* L) {
+	for (auto value : magic_enum::enum_values<BosstiaryRarity_t>()) {
+		registerEnumClass(L, value);
+	}
+}
+
 void LuaEnums::initSoundEnums(lua_State* L) {
 	for (auto value : magic_enum::enum_values<SoundEffect_t>()) {
 		registerEnumClass(L, value);
