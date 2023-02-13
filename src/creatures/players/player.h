@@ -72,7 +72,7 @@ struct ForgeHistory {
 	bool tierLoss = false;
 	bool successCore = false;
 	bool tierCore = false;
-	
+
 	std::string description;
 	std::string firstItemName;
 	std::string secondItemName;
@@ -143,7 +143,16 @@ class Player final : public Creature, public Cylinder
 		bool tameMount(uint8_t mountId);
 		bool untameMount(uint8_t mountId);
 		bool hasMount(const Mount* mount) const;
+		bool hasAnyMount() const;
+		uint8_t getRandomMountId() const;
 		void dismount();
+
+		uint8_t isRandomMounted() const {
+			return randomMount;
+		}
+		void setRandomMount(uint8_t isMountRandomized) {
+			randomMount = isMountRandomized;
+		}
 
 		void sendFYIBox(const std::string& message) {
 			if (client) {
@@ -384,7 +393,7 @@ class Player final : public Creature, public Cylinder
 		uint8_t getBlessingCount(uint8_t index) const {
 			return blessings[index - 1];
 		}
-		std::string getBlessingsName() const; 
+		std::string getBlessingsName() const;
 
 		bool isOffline() const {
 			return (getID() == 0);
@@ -2092,7 +2101,7 @@ class Player final : public Creature, public Cylinder
 		void forgeTransferItemTier(uint16_t donorItemId, uint8_t tier, uint16_t receiveItemId);
 		void forgeResourceConversion(uint8_t action);
 		void forgeHistory(uint8_t page) const;
-		
+
 		void sendOpenForge() const
 		{
 			if (client)
@@ -2187,6 +2196,8 @@ class Player final : public Creature, public Cylinder
 		}
 
 		void registerForgeHistoryDescription(ForgeHistory history);
+
+		std::map<uint16_t, Item*> getEquippedItemsWithEnabledAbilitiesBySlot() const;
 
 	private:
 		std::forward_list<Condition*> getMuteConditions() const;
@@ -2390,6 +2401,7 @@ class Player final : public Creature, public Cylinder
 		int32_t idleTime = 0;
 		uint32_t coinBalance = 0;
 		uint16_t expBoostStamina = 0;
+		uint8_t randomMount = 0;
 
 		uint16_t lastStatsTrainingTime = 0;
 		uint16_t staminaMinutes = 2520;
@@ -2528,7 +2540,21 @@ class Player final : public Creature, public Cylinder
 		friend class MoveEvent;
 		friend class BedItem;
 
-  account::Account *account_;
+		account::Account *account_;
+
+		bool hasQuiverEquipped() const;
+
+		bool hasWeaponDistanceEquipped() const;
+
+		Item* getQuiverAmmoOfType(const ItemType &it) const;
+
+		std::array<double_t, COMBAT_COUNT> getFinalDamageReduction() const;
+		void calculateDamageReductionFromEquipedItems(std::array<double_t, COMBAT_COUNT> &combatReductionMap) const;
+		void calculateDamageReductionFromItem(std::array<double_t, COMBAT_COUNT> &combatReductionMap, Item *item) const;
+		void updateDamageReductionFromItemImbuement(std::array<double_t, COMBAT_COUNT> &combatReductionMap, Item *item, uint16_t combatTypeIndex) const;
+		void updateDamageReductionFromItemAbility(std::array<double_t, COMBAT_COUNT> &combatReductionMap, const Item *item, uint16_t combatTypeIndex) const;
+		double_t calculateDamageReduction(double_t currentTotal, int16_t resistance) const;
 };
+
 
 #endif  // SRC_CREATURES_PLAYERS_PLAYER_H_

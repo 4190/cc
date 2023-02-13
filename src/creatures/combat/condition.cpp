@@ -907,7 +907,7 @@ bool ConditionRegeneration::executeCondition(Creature* creature, int64_t interva
 		}
 	}
 
-	return executeCondition(creature, interval);
+	return ConditionGeneric::executeCondition(creature, interval);
 }
 
 bool ConditionRegeneration::setParam(ConditionParam_t param, int64_t value)
