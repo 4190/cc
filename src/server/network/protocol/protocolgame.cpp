@@ -1963,7 +1963,7 @@ void ProtocolGame::parseBestiarysendMonsterData(NetworkMessage &msg) {
 
 		newmsg.addByte(attackmode);
 		newmsg.addByte(0x2);
-		newmsg.add<uint32_t>(convertToSafeInteger<uint32_t>(mtype->info.healthMax));
+		newmsg.add<uint32_t>(static_cast<uint32_t>(mtype->info.healthMax));
 		newmsg.add<uint32_t>(mtype->info.experience);
 		newmsg.add<uint16_t>(mtype->getBaseSpeed());
 		newmsg.add<uint16_t>(mtype->info.armor);
@@ -4849,10 +4849,7 @@ void ProtocolGame::sendCreatureHealth(const Creature* creature) {
 	if (creature->isHealthHidden()) {
 		msg.addByte(0x00);
 	} else {
-		auto creatureHealth = creature->getHealth();
-		auto creatureMaxHealth = std::max<int64_t>(creature->getMaxHealth(), 1);
-		double healthPercentage = (static_cast<double>(creatureHealth / creatureMaxHealth)) * 100.;
-		msg.addByte(convertToSafeInteger<uint8_t>(std::ceil(healthPercentage)));
+		msg.addByte(std::ceil((static_cast<double>(creature->getHealth()) / std::max<int32_t>(creature->getMaxHealth(), 1)) * 100));
 	}
 	writeToOutputBuffer(msg);
 }
@@ -5868,7 +5865,7 @@ void ProtocolGame::AddCreature(NetworkMessage &msg, const Creature* creature, bo
 		auto creatureHealth = creature->getHealth();
 		auto creatureMaxHealth = std::max<int64_t>(creature->getMaxHealth(), 1);
 		double healthPercentage = (static_cast<double>(creatureHealth / creatureMaxHealth)) * 100.;
-		msg.addByte(convertToSafeInteger<uint8_t>(std::ceil(healthPercentage)));
+		msg.addByte(static_cast<uint8_t>(std::ceil(healthPercentage)));
 	}
 
 	msg.addByte(creature->getDirection());
