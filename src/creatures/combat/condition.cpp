@@ -29,7 +29,7 @@ bool Condition::setParam(ConditionParam_t param, int64_t value) {
 		}
 
 		case CONDITION_PARAM_SUBID: {
-			subId = static_cast<uint32_t>(value);
+			subId = convertToSafeInteger<uint32_t>(value);
 			return true;
 		}
 
@@ -135,7 +135,7 @@ void Condition::serialize(PropWriteStream &propWriteStream) {
 	propWriteStream.write<uint32_t>(id);
 
 	propWriteStream.write<uint8_t>(CONDITIONATTR_TICKS);
-	propWriteStream.write<uint32_t>(static_cast<uint32_t>(ticks));
+	propWriteStream.write<uint32_t>(convertToSafeInteger<uint32_t>(ticks));
 
 	propWriteStream.write<uint8_t>(CONDITIONATTR_ISBUFF);
 	propWriteStream.write<uint8_t>(isBuff);
@@ -451,7 +451,7 @@ void ConditionAttributes::updatePercentStats(Player* player) {
 
 		switch (i) {
 			case STAT_MAXHITPOINTS:
-				stats[i] = player->getMaxHealth() * (statsPercent[i] - 100) / 100;
+				stats[i] = static_cast<int32_t>(player->getMaxHealth() * ((statsPercent[i] - 100) / 100.f));
 				break;
 
 			case STAT_MAXMANAPOINTS:
@@ -1457,7 +1457,7 @@ bool ConditionSpeed::setParam(ConditionParam_t param, int64_t value) {
 		return false;
 	}
 
-	speedDelta = convertToSafeInteger<int32_t>(value);
+	speedDelta = value;
 
 	if (value > 0) {
 		conditionType = CONDITION_HASTE;
@@ -1510,9 +1510,7 @@ bool ConditionSpeed::startCondition(Creature* creature) {
 		int64_t min;
 		int64_t max;
 		getFormulaValues(creature->getBaseSpeed(), min, max);
-		// convert to save int32_t
-		auto randomValue = uniform_random(min, max);
-		speedDelta = convertToSafeInteger<int32_t>(randomValue);
+		speedDelta = uniform_random(min, max);
 	}
 
 	g_game().changeSpeed(creature, speedDelta);
@@ -1546,9 +1544,7 @@ void ConditionSpeed::addCondition(Creature* creature, const Condition* addCondit
 		int64_t min;
 		int64_t max;
 		getFormulaValues(creature->getBaseSpeed(), min, max);
-		// convert to save int32_t
-		auto randomValue = uniform_random(min, max);
-		speedDelta = convertToSafeInteger<int32_t>(randomValue);
+		speedDelta = uniform_random(min, max);
 	}
 
 	int32_t newSpeedChange = (speedDelta - oldSpeedDelta);

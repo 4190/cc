@@ -51,6 +51,10 @@ Player::~Player() {
 		it.second->decrementReferenceCounter();
 	}
 
+	for (const auto &it : rewardMap) {
+		it.second->decrementReferenceCounter();
+	}
+
 	for (const auto &it : quickLootContainers) {
 		it.second->decrementReferenceCounter();
 	}
@@ -201,11 +205,11 @@ std::string Player::getDescription(int32_t lookDistance) const {
 }
 
 int64_t Player::getMaxHealth() const {
-	return std::max<int32_t>(1, healthMax + varStats[STAT_MAXHITPOINTS]);
+	return convertToSafeInteger<int64_t>(healthMax + varStats[STAT_MAXHITPOINTS]);
 }
 
 uint32_t Player::getMaxMana() const {
-	return std::max<int32_t>(0, manaMax + varStats[STAT_MAXMANAPOINTS]);
+	return convertToSafeInteger<uint32_t>(manaMax + varStats[STAT_MAXMANAPOINTS]);
 }
 
 Item* Player::getInventoryItem(Slots_t slot) const {
@@ -483,6 +487,8 @@ void Player::updateInventoryWeight() {
 }
 
 void Player::updateInventoryImbuement() {
+	// Used to prevent unnecessary imbuement tracker update every second on every inventory items imbue slots
+	bool trackerUpdated = false;
 	// Get the tile the player is currently on
 	const Tile* playerTile = getTile();
 	// Check if the player is in a protection zone
@@ -493,12 +499,15 @@ void Player::updateInventoryImbuement() {
 	// Iterate through all items in the player's inventory
 	for (auto item : getAllInventoryItems()) {
 		// Iterate through all imbuement slots on the item
-
 		for (uint8_t slotid = 0; slotid < item->getImbuementSlot(); slotid++) {
 			ImbuementInfo imbuementInfo;
 			// Get the imbuement information for the current slot
 			if (!item->getImbuementInfo(slotid, &imbuementInfo)) {
 				// If no imbuement is found, continue to the next slot
+				if (imbuementTrackerControl[item->getSlotPosition()]) {
+					imbuementTrackerControl[item->getSlotPosition()] = false;
+					trackerUpdated = true;
+				}
 				break;
 			}
 
@@ -510,16 +519,28 @@ void Player::updateInventoryImbuement() {
 			auto parent = item->getParent();
 			// If the imbuement is aggressive and the player is not in fight mode or is in a protection zone, or the item is in a container, ignore it.
 			if (categoryImbuement && categoryImbuement->agressive && (isInProtectionZone || !isInFightMode)) {
+				if (parent && parent == this && imbuementTrackerControl[item->getSlotPosition()]) {
+					imbuementTrackerControl[item->getSlotPosition()] = false;
+					trackerUpdated = true;
+				}
 				continue;
 			}
 			// If the item is not in the backpack slot and it's not a agressive imbuement, ignore it.
 			if (categoryImbuement && !categoryImbuement->agressive && parent && parent != this) {
+				if (parent && parent == this && imbuementTrackerControl[item->getSlotPosition()]) {
+					imbuementTrackerControl[item->getSlotPosition()] = false;
+					trackerUpdated = true;
+				}
 				continue;
 			}
 
 			// If the imbuement's duration is 0, remove its stats and continue to the next slot
 			if (imbuementInfo.duration == 0) {
 				removeItemImbuementStats(imbuement);
+				if (parent && parent == this && imbuementTrackerControl[item->getSlotPosition()]) {
+					imbuementTrackerControl[item->getSlotPosition()] = false;
+					trackerUpdated = true;
+				}
 				continue;
 			}
 
@@ -528,7 +549,16 @@ void Player::updateInventoryImbuement() {
 			uint64_t duration = std::max<uint64_t>(0, imbuementInfo.duration - EVENT_IMBUEMENT_INTERVAL / 1000);
 			// Update the imbuement's duration in the item
 			item->decayImbuementTime(slotid, imbuement->getID(), duration);
+			if (parent && parent == this && !imbuementTrackerControl[item->getSlotPosition()]) {
+				imbuementTrackerControl[item->getSlotPosition()] = true;
+				trackerUpdated = true;
+			}
 		}
+	}
+
+	// If there's been an alteration on the item imbue related to the client tracker, lets send the informations to the client
+	if (trackerUpdated) {
+		updateImbuementTrackerStats();
 	}
 }
 
@@ -677,17 +707,12 @@ void Player::closeContainer(uint8_t cid) {
 
 	OpenContainer openContainer = it->second;
 	Container* container = openContainer.container;
-	openContainers.erase(it);
 
-	if (!container) {
-		return;
-	}
-
-	if (container->isAnykindOfRewardContainer() && !hasAnykindOfRewardContainerOpen()) {
+	if (container && container->isAnykindOfRewardContainer() && !hasOtherRewardContainerOpen(container)) {
 		removeEmptyRewards();
 	}
-
-	if (container->getID() == ITEM_BROWSEFIELD) {
+	openContainers.erase(it);
+	if (container && container->getID() == ITEM_BROWSEFIELD) {
 		container->decrementReferenceCounter();
 	}
 }
@@ -696,16 +721,17 @@ void Player::removeEmptyRewards() {
 	std::erase_if(rewardMap, [this](const auto &rewardBag) {
 		auto [id, reward] = rewardBag;
 		if (reward->empty()) {
-			this->getRewardChest()->removeThing(reward.get(), 1);
+			this->getRewardChest()->removeThing(reward, 1);
+			reward->decrementReferenceCounter();
 			return true;
 		}
 		return false;
 	});
 }
 
-bool Player::hasAnykindOfRewardContainerOpen() const {
-	return std::ranges::any_of(openContainers.begin(), openContainers.end(), [](const auto &containerPair) {
-		return containerPair.second.container->isAnykindOfRewardContainer();
+bool Player::hasOtherRewardContainerOpen(const Container* container) const {
+	return std::ranges::any_of(openContainers.begin(), openContainers.end(), [container](const auto &containerPair) {
+		return containerPair.second.container != container && containerPair.second.container->isAnykindOfRewardContainer();
 	});
 }
 
@@ -1078,7 +1104,7 @@ RewardChest* Player::getRewardChest() {
 	return rewardChest;
 }
 
-std::shared_ptr<Reward> Player::getReward(const uint64_t rewardId, const bool autoCreate) {
+Reward* Player::getReward(const uint64_t rewardId, const bool autoCreate) {
 	auto it = rewardMap.find(rewardId);
 	if (it != rewardMap.end()) {
 		return it->second;
@@ -1087,10 +1113,11 @@ std::shared_ptr<Reward> Player::getReward(const uint64_t rewardId, const bool au
 		return nullptr;
 	}
 
-	const auto reward = std::make_shared<Reward>();
+	auto reward = new Reward();
+	reward->incrementReferenceCounter();
 	reward->setAttribute(ItemAttribute_t::DATE, rewardId);
 	rewardMap[rewardId] = reward;
-	g_game().internalAddItem(getRewardChest(), reward.get(), INDEX_WHEREEVER, FLAG_NOLIMIT);
+	g_game().internalAddItem(getRewardChest(), reward, INDEX_WHEREEVER, FLAG_NOLIMIT);
 
 	return reward;
 }
@@ -1567,6 +1594,7 @@ void Player::onChangeZone(ZoneType_t zone) {
 		}
 	}
 
+	updateImbuementTrackerStats();
 	g_game().updateCreatureWalkthrough(this);
 	sendIcons();
 	g_events().eventPlayerOnChangeZone(this, zone);
@@ -5678,6 +5706,12 @@ void Player::removeItemImbuementStats(const Imbuement* imbuement) {
 	if (requestUpdate) {
 		sendStats();
 		sendSkills();
+	}
+}
+
+void Player::updateImbuementTrackerStats() {
+	if (imbuementTrackerWindowOpen) {
+		g_game().playerRequestInventoryImbuements(getID(), true);
 	}
 }
 

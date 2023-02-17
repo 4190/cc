@@ -665,7 +665,7 @@ class Player final : public Creature, public Cylinder {
 		void addConditionSuppressions(uint32_t conditions);
 		void removeConditionSuppressions(uint32_t conditions);
 
-		std::shared_ptr<Reward> getReward(const uint64_t rewardId, const bool autoCreate);
+		Reward* getReward(const uint64_t rewardId, const bool autoCreate);
 		void removeReward(uint64_t rewardId);
 		void getRewardList(std::vector<uint64_t> &rewards) const;
 		RewardChest* getRewardChest();
@@ -1646,6 +1646,7 @@ class Player final : public Creature, public Cylinder {
 
 		void addItemImbuementStats(const Imbuement* imbuement);
 		void removeItemImbuementStats(const Imbuement* imbuement);
+		void updateImbuementTrackerStats();
 
 		bool isUIExhausted(uint32_t exhaustionTime = 250) const;
 		void updateUIExhausted();
@@ -2264,6 +2265,12 @@ class Player final : public Creature, public Cylinder {
 			}
 		}
 
+		void sendInventoryImbuements(std::map<Slots_t, Item*> items) {
+			if (client) {
+				client->sendInventoryImbuements(items);
+			}
+		}
+
 	private:
 		static uint32_t playerFirstID;
 		static uint32_t playerLastID;
@@ -2345,6 +2352,7 @@ class Player final : public Creature, public Cylinder {
 		std::map<uint8_t, int64_t> moduleDelayMap;
 		std::map<uint32_t, int32_t> storageMap;
 		std::map<uint16_t, uint64_t> itemPriceMap;
+		std::map<int32_t, bool> imbuementTrackerControl;
 
 		std::map<uint8_t, uint16_t> maxValuePerSkill = {
 			{ SKILL_LIFE_LEECH_CHANCE, 100 },
@@ -2352,7 +2360,7 @@ class Player final : public Creature, public Cylinder {
 			{ SKILL_CRITICAL_HIT_CHANCE, g_configManager().getNumber(CRITICALCHANCE) }
 		};
 
-		std::map<uint64_t, std::shared_ptr<Reward>> rewardMap;
+		std::map<uint64_t, Reward*> rewardMap;
 
 		std::map<ObjectCategory_t, Container*> quickLootContainers;
 		std::vector<ForgeHistory> forgeHistoryVector;
@@ -2543,6 +2551,7 @@ class Player final : public Creature, public Cylinder {
 		bool exerciseTraining = false;
 		bool moved = false;
 		bool dead = false;
+		bool imbuementTrackerWindowOpen = false;
 
 		void updateItemsLight(bool internal = false);
 		uint16_t getStepSpeed() const override {
@@ -2619,7 +2628,7 @@ class Player final : public Creature, public Cylinder {
 		double_t calculateDamageReduction(double_t currentTotal, int16_t resistance) const;
 
 		void removeEmptyRewards();
-		bool hasAnykindOfRewardContainerOpen() const;
+		bool hasOtherRewardContainerOpen(const Container* container) const;
 };
 
 #endif // SRC_CREATURES_PLAYERS_PLAYER_H_
