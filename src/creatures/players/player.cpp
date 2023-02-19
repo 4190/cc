@@ -205,11 +205,11 @@ std::string Player::getDescription(int32_t lookDistance) const {
 }
 
 int64_t Player::getMaxHealth() const {
-	return convertToSafeInteger<int64_t>(healthMax + varStats[STAT_MAXHITPOINTS]);
+	return std::max<int32_t>(1, healthMax + varStats[STAT_MAXHITPOINTS]);
 }
 
 uint32_t Player::getMaxMana() const {
-	return convertToSafeInteger<uint32_t>(manaMax + varStats[STAT_MAXMANAPOINTS]);
+	return std::max<int32_t>(0, manaMax + varStats[STAT_MAXMANAPOINTS]);
 }
 
 Item* Player::getInventoryItem(Slots_t slot) const {
