@@ -4181,7 +4181,7 @@ GameStore.Categories = {
 			{
 				icons = {"Charm_Expansion_Offer.png"},
 				name = "Charm Expansion",
-				price = 450,
+				price = 150,
 				id = GameStore.SubActions.CHARM_EXPANSION,
 				description = "<i>Assign as many of your unlocked Charms as you like and get a 25% discount whenever you are removing a Charm from a creature!</i>\n\n{character}\n{once}",
 				type = GameStore.OfferTypes.OFFER_TYPE_CHARMS
@@ -4189,7 +4189,7 @@ GameStore.Categories = {
 			{
 				icons = {"Permanent_Prey_Slot.png"},
 				name = "Permanent Prey Slot",
-				price = 900,
+				price = 150,
 				id = GameStore.SubActions.PREY_THIRDSLOT_REDIRECT,
 				description = "<i>Get an additional prey slot to activate additional prey!</i>\n\n{character}\n{info} maximum amount that can be owned by character: 3\n{info} added directly to Prey dialog",
 				type = GameStore.OfferTypes.OFFER_TYPE_PREYSLOT
@@ -4214,7 +4214,7 @@ GameStore.Categories = {
 			{
 				icons = { "Gold_Pouch.png" },
 				name = "Gold Pouch",
-				price = 900,
+				price = 100,
 				itemtype = 23721,
 				count = 1,
 				description = "<i>Carries as many gold, platinum or crystal coins as your capacity allows, however, no other items.</i>\n\n{character}\n{storeinbox}\n{once}\n{useicon} use it to open it\n{info} always placed on the first position of your Store inbox",
@@ -4223,7 +4223,7 @@ GameStore.Categories = {
 			{
 				icons = { "Magic_Gold_Converter.png" },
 				name = "Magic Gold Converter",
-				price = 15,
+				price = 0,
 				itemtype = 28525,
 				charges = 500,
 				description = "<i>Changes automatically either a stack of 100 gold pieces into 1 platinum coin, or a stack of 100 platinum coins into 1 crystal coin!</i>\n\n{character}\n{storeinbox}\n{useicon} use it to activate or deactivate the automatic conversion\n{info} converts all stacks of 100 gold or platinum in the inventory whenever it is activated\n{info} deactivated upon purchase\n{info} usable for 500 conversions a piece",
