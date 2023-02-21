@@ -4,14 +4,14 @@ local foodCondition = Condition(CONDITION_REGENERATION, CONDITIONID_DEFAULT)
 function Player.feed(self, food)
 	local condition = self:getCondition(CONDITION_REGENERATION, CONDITIONID_DEFAULT)
 	if condition then
-		condition:setTicks(condition:getTicks() + (food * 100000))
+		condition:setTicks(condition:getTicks() + (food * 1000))
 	else
 		local vocation = self:getVocation()
 		if not vocation then
 			return nil
 		end
 
-		foodCondition:setTicks(food * 100000)
+		foodCondition:setTicks(food * 1000)
 		foodCondition:setParameter(CONDITION_PARAM_HEALTHGAIN, vocation:getHealthGainAmount())
 		foodCondition:setParameter(CONDITION_PARAM_HEALTHTICKS, vocation:getHealthGainTicks())
 		foodCondition:setParameter(CONDITION_PARAM_MANAGAIN, vocation:getManaGainAmount())
@@ -99,6 +99,10 @@ end
 
 -- Functions From OTServBR-Global
 function Player.getCookiesDelivered(self)
+	if not IsRunningGlobalDatapack() then
+		return true
+	end
+
 	local storage, amount = {
 		Storage.WhatAFoolish.CookieDelivery.SimonTheBeggar, Storage.WhatAFoolish.CookieDelivery.Markwin, Storage.WhatAFoolish.CookieDelivery.Ariella,
 		Storage.WhatAFoolish.CookieDelivery.Hairycles, Storage.WhatAFoolish.CookieDelivery.Djinn, Storage.WhatAFoolish.CookieDelivery.AvarTar,
@@ -114,10 +118,14 @@ function Player.getCookiesDelivered(self)
 end
 
 function Player.allowMovement(self, allow)
-	return self:setStorageValue(Storage.blockMovementStorage, allow and -1 or 1)
+	return self:setStorageValue(Global.Storage.blockMovementStorage, allow and -1 or 1)
 end
 
 function Player.checkGnomeRank(self)
+	if not IsRunningGlobalDatapack() then
+		return true
+	end
+
 	local points = self:getStorageValue(Storage.BigfootBurden.Rank)
 	local questProgress = self:getStorageValue(Storage.BigfootBurden.QuestLine)
 	if points >= 30 and points < 120 then
@@ -275,7 +283,7 @@ function Player:removeMoneyBank(amount)
 end
 
 function Player.hasAllowMovement(self)
-	return self:getStorageValue(Storage.blockMovementStorage) ~= 1
+	return self:getStorageValue(Global.Storage.blockMovementStorage) ~= 1
 end
 
 function Player.hasRookgaardShield(self)
