@@ -503,6 +503,8 @@ bool IOLoginData::loadPlayer(Player* player, DBResult_ptr result) {
 		player->internalAddThing(CONST_SLOT_STORE_INBOX, Item::CreateItem(ITEM_STORE_INBOX));
 	}
 
+	IOLoginDataLoad::loadRewardItems(player);
+
 	// load depot items
 	itemMap.clear();
 	query.str(std::string());
@@ -536,11 +538,7 @@ bool IOLoginData::loadPlayer(Player* player, DBResult_ptr result) {
 		}
 	}
 
-	IOLoginDataLoad::loadRewardItems(player);
-
 	// load inbox items
-	itemMap.clear();
-
 	query.str(std::string());
 	query << "SELECT `pid`, `sid`, `itemtype`, `count`, `attributes` FROM `player_inboxitems` WHERE `player_id` = " << player->getGUID() << " ORDER BY `sid` DESC";
 	if ((result = db.storeQuery(query.str()))) {
