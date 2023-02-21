@@ -13,7 +13,7 @@ local secondCombat = Combat()
 secondCombat:setParameter(COMBAT_PARAM_TYPE, COMBAT_EARTHDAMAGE)
 secondCombat:addCondition(condition)
 
-local viperStar = Weapon(WEAPON_MISSILE)
+local viperStar = Weapon(WEAPON_DISTANCE)
 
 function viperStar.onUseWeapon(player, variant)
 	local boolean = combat:execute(player, variant)

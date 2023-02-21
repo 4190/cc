@@ -236,10 +236,10 @@ local function donationHandler(npc, creature, message, keywords, parameters, nod
 			npcHandler:say("Well, har har. Very funny. Come on, pick up the gold you just dropped.", npc, creature)
 		end
 	elseif (parameters.decline == true) then
-		if player:getMoney() > 500 then
+		if player:getMoney() > 5000 then
 			npcHandler:say(
 				"By tempest! What's all this gold weighing us down? Don't you think that's a little risky with all \z
-				these pirates around? You can take 500 with you, but that's it. Drop the rest or {donate} it to the \z
+				these pirates around? You can take 5000 with you, but that's it. Drop the rest or {donate} it to the \z
 				Adventurers' Orphans Fund, really.", npc, creature)
 		end
 	end
@@ -267,10 +267,10 @@ local function townTravelHandler(npc, creature, message, keywords, parameters, n
 		end
 	elseif (parameters.confirm == true) then
 		-- Handle money excess at confirm or it may be dropped and picked up in previous steps
-		if player:getMoney() > 500 then
+		if player:getMoney() > 5000 then
 			npcHandler:say(
 				"By tempest! What's all this gold weighing us down? Don't you think that's a little risky with all \z
-				these pirates around? You can take 500 with you, but that's it. Drop the rest or {donate} it to the \z
+				these pirates around? You can take 5000 with you, but that's it. Drop the rest or {donate} it to the \z
 				Adventurers' Orphans Fund, really.", npc, creature)
 			return true
 		end

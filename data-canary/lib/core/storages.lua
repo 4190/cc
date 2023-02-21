@@ -32,9 +32,14 @@ Storage = {
 		}
 	},
 
+	NpcExhaust = 30000,
+	StoreExaust = 30001,
 	DelayLargeSeaShell = 30002,
 	Promotion = 30003,
-	Imbuement = 30004
+	Imbuement = 30004,
+	FamiliarSummon = 30005,
+	FamiliarSummonEvent10 = 30006,
+	FamiliarSummonEvent60 = 30007
 }
 
 GlobalStorage = {
