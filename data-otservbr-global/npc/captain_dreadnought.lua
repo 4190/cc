@@ -186,7 +186,7 @@ local towns = {
 	}
 }
 
-local defaultTown = TOWNS_LIST.VENORE
+local defaultTown = TOWNS_LIST.THAIS
 local townNames = {all = "", free = "", premium = ""}
 
 -- Function to build town names strings and adds additional data to sailable/premium towns about
