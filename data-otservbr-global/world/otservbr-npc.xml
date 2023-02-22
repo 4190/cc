@@ -2943,4 +2943,7 @@
 	<npc centerx="32360" centery="32219" centerz="6" radius="1">
 		<npc name="Grizzly Adams" x="0" y="0" z="6" spawntime="60" />
 	</npc>
+	<npc centerx="32359" centery="32233" centerz="7" radius="1">
+		<npc name="Trader" x="0" y="0" z="6" spawntime="60" />
+	</npc>
 </npcs>
