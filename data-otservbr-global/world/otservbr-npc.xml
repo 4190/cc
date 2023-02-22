@@ -2940,4 +2940,7 @@
 	<npc centerx="32362" centery="32224" centerz="7" radius="1">
 		<npc name="Yasir" x="0" y="0" z="7" spawntime="60" />
 	</npc>
+	<npc centerx="32360" centery="32219" centerz="6" radius="1">
+		<npc name="Grizzly Adams" x="0" y="0" z="6" spawntime="60" />
+	</npc>
 </npcs>

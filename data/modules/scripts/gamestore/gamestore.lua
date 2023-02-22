@@ -4197,7 +4197,7 @@ GameStore.Categories = {
 			{
 				icons = {"Permanent_Hunting_Task_Slot.png"},
 				name = "Permanent Hunting Task Slot",
-				price = 900,
+				price = 100,
 				id = GameStore.SubActions.TASKHUNTING_THIRDSLOT,
 				description = "<i>Get an additional hunting tasks slot to activate additional hunting task!</i>\n\n{character}\n{info} maximum amount that can be owned by character: 3\n{info} added directly to Hunting Task dialog",
 				type = GameStore.OfferTypes.OFFER_TYPE_HUNTINGSLOT
