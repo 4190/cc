@@ -1,3 +1,18 @@
+local timeOnline = 60 * 60 * 1000
+local pointPlayers = {}
+
+function addPremiumPoint(PID, playerIP)
+    local player = Player(PID)
+    if player then
+        db.query("UPDATE accounts SET coins = coins + 1 WHERE id = '" ..player:getAccountId().. "';")
+        player:sendTextMessage(MESSAGE_STATUS_DEFAULT, "You have been online for an hour and have earned 1 Store coin.")
+        addEvent(addPremiumPoint,timeOnline , PID, playerIP)
+        return true
+    else
+        pointPlayers[playerIP] = nil
+    end
+end
+
 local function onMovementRemoveProtection(cid, oldPos, time)
 	local player = Player(cid)
 	if not player then
@@ -21,6 +36,13 @@ end
 local playerLogin = CreatureEvent("PlayerLogin")
 
 function playerLogin.onLogin(player)
+	local PID = player:getId()
+	local playerIP = player:getIp()
+	if not pointPlayers[player:getIp()]  then
+		pointPlayers[playerIP] = true
+		addEvent(addPremiumPoint,timeOnline , PID, playerIP)
+	end
+
 	local items = {
 		{3003, 1},
 		{3031, 3}
