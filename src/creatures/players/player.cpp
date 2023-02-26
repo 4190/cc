@@ -1365,13 +1365,14 @@ void Player::openImbuementWindow(Item* item) {
 		return;
 	}
 
-	if (item->getTopParent() != this) {
-		this->sendTextMessage(MESSAGE_FAILURE, "You have to pick up the item to imbue it.");
+	if (item->getImbuementSlot() <= 0) {
+		this->sendTextMessage(MESSAGE_EVENT_ADVANCE, "This item is not imbuable.");
 		return;
 	}
 
-	if (item->getImbuementSlot() <= 0) {
-		this->sendTextMessage(MESSAGE_FAILURE, "This item is not imbuable.");
+	auto itemParent = item->getTopParent();
+	if (itemParent && itemParent != this) {
+		this->sendTextMessage(MESSAGE_EVENT_ADVANCE, "You have to pick up the item to imbue it.");
 		return;
 	}
 
@@ -4004,12 +4005,16 @@ void Player::getPathSearchParams(const Creature* creature, FindPathParams &fpp) 
 	fpp.fullPathSearch = true;
 }
 
-uint16_t Player::getSkillLevel(uint8_t skill) const {
+uint16_t Player::getSkillLevel(uint8_t skill, bool sendToClient /* = false*/) const {
 	auto skillLevel = convertToSafeInteger<uint16_t>(skills[skill].level + varSkills[skill]);
-
 	if (auto it = maxValuePerSkill.find(skill);
 		it != maxValuePerSkill.end()) {
 		skillLevel = std::min<uint16_t>(it->second, skillLevel);
+	}
+
+	// Send to client multiplied skill mana/life leech (13.00+ version changed to decimal)
+	if (sendToClient && (skill == SKILL_MANA_LEECH_AMOUNT || skill == SKILL_LIFE_LEECH_AMOUNT)) {
+		return skillLevel * 100;
 	}
 
 	return skillLevel;
