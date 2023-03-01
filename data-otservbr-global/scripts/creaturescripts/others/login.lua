@@ -66,6 +66,8 @@ function playerLogin.onLogin(player)
 		end
 	else
 		player:sendTextMessage(MESSAGE_STATUS, "Welcome to " .. SERVER_NAME .. "!")
+		player:sendTextMessage(MESSAGE_BOOSTED_CREATURE, "Remember you can get magical gold converter for free from store and King Tibianus can promote you for free.")
+		player:sendTextMessage(MESSAGE_BOOSTED_CREATURE, "You can always join discord and suggest some changes or report bugs (https://discord.com/invite/vbs3QEmxBm).")
 		player:sendTextMessage(MESSAGE_LOGIN, string.format("Your last visit in ".. SERVER_NAME ..": %s.", os.date("%d. %b %Y %X", player:getLastLoginSaved())))
 	end
 
