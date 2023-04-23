@@ -13,9 +13,11 @@ end
 
 rune:group("attack")
 rune:name("poison bomb rune")
+rune:castSound(SOUND_EFFECT_TYPE_SPELL_OR_RUNE)
+rune:impactSound(SOUND_EFFECT_TYPE_SPELL_POISON_BOMB_RUNE)
 rune:runeId(3173)
 rune:allowFarUse(true)
-rune:setPzLocked(true)
+rune:setPzLocked(false)
 rune:charges(2)
 rune:level(25)
 rune:magicLevel(4)

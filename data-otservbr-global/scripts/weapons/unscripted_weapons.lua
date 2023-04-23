@@ -4883,7 +4883,7 @@ local weapons = {
 		-- spear
 		itemid = 3277,
 		type = WEAPON_MISSILE,
-		breakchance = 3
+		--breakchance = 3
 	},
 	{
 		-- hatchet
@@ -5114,7 +5114,7 @@ local weapons = {
 		-- small stone
 		itemid = 1781,
 		type = WEAPON_MISSILE,
-		breakchance = 3
+		--breakchance = 3
 	}
 }
 

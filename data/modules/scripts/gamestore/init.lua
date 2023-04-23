@@ -766,7 +766,11 @@ function sendShowStoreOffers(playerId, category, redirectId)
 				if (off.disabledReadonIndex ~= nil) then
 					msg:addByte(0x01);
 					msg:addU16(off.disabledReadonIndex)
+<<<<<<< HEAD
 					off.disabledReadonIndex = nil
+=======
+					off.disabledReadonIndex = nil -- Reseting the table to nil disable reason
+>>>>>>> wheelot
 				end
 
 				if (off.state) then
@@ -884,7 +888,7 @@ function sendStorePurchaseSuccessful(playerId, message)
 
 	local msg = NetworkMessage()
 	msg:addByte(GameStore.SendingPackets.S_CompletePurchase)
-	msg:addByte(0x00)
+	msg:addByte(0x01)
 	msg:addString(message)
 
 	msg:sendToPlayer(player)
@@ -1096,6 +1100,10 @@ GameStore.retrieveHistoryEntries = function(accountId, currentPage, entriesPerPa
 				mode = result.getNumber(resultId, "mode"),
 				description = result.getString(resultId, "description"),
 				amount = result.getNumber(resultId, "coin_amount"),
+<<<<<<< HEAD
+=======
+				type = result.getNumber(resultId, "coin_type"),
+>>>>>>> wheelot
 				time = result.getNumber(resultId, "time"),
 			}
 			table.insert(entries, entry)
@@ -1728,7 +1736,7 @@ function sendHomePage(playerId)
 		if (offer.disabledReadonIndex ~= nil) then
 			msg:addByte(0x01);
 			msg:addU16(offer.disabledReadonIndex)
-			offer.disabledReadonIndex = nil
+			offer.disabledReadonIndex = nil -- Reseting the table to nil disable reason
 		end
 
 		msg:addByte(0x00)

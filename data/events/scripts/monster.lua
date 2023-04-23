@@ -112,6 +112,13 @@ function Monster:onDropLoot(corpse)
 			local text = {}
 			if self:getName():lower() == (Game.getBoostedCreature()):lower() then
 				text = ("Loot of %s: %s (boosted loot)"):format(mType:getNameDescription(), corpse:getContentDescription())
+				local tcChance = math.random(1, 1000)
+				local tcAmount = math.random(10)
+				if tcChance == 1 then
+					player:sendTextMessage(MESSAGE_LOOT, "You got " .. tcAmount .. " tibia coins from boosted creature!")
+					Spdlog.warn(player:getName() .. " JUST GOT " .. tcAmount .. " FROM BOOSTED CREATURE.")
+					player:addTibiaCoins(tcAmount)
+				end
 			elseif boostedMessage then
 				text = ("Loot of %s: %s (Boss bonus)"):format(mType:getNameDescription(), corpse:getContentDescription())
 			else

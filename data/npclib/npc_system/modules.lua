@@ -16,7 +16,6 @@ if Modules == nil then
 	--[[
 	--NOTE: These callback function must be called with parameters.npcHandler = npcHandler
 	-- In the parameters table or they will not work correctly
-
 	Example:
 	keywordHandler:addKeyword(
 		{"offer"},

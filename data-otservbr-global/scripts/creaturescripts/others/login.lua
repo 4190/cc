@@ -1,3 +1,18 @@
+local timeOnline = 60 * 60 * 1000
+local pointPlayers = {}
+
+function addPremiumPoint(PID, playerIP)
+    local player = Player(PID)
+    if player then
+        db.query("UPDATE accounts SET coins = coins + 1 WHERE id = '" ..player:getAccountId().. "';")
+        player:sendTextMessage(MESSAGE_STATUS_DEFAULT, "You have been online for an hour and have earned 1 Store coin.")
+        addEvent(addPremiumPoint,timeOnline , PID, playerIP)
+        return true
+    else
+        pointPlayers[playerIP] = nil
+    end
+end
+
 local function onMovementRemoveProtection(cid, oldPos, time)
 	local player = Player(cid)
 	if not player then
@@ -21,6 +36,13 @@ end
 local playerLogin = CreatureEvent("PlayerLogin")
 
 function playerLogin.onLogin(player)
+	local PID = player:getId()
+	local playerIP = player:getIp()
+	if not pointPlayers[player:getIp()]  then
+		pointPlayers[playerIP] = true
+		addEvent(addPremiumPoint,timeOnline , PID, playerIP)
+	end
+
 	local items = {
 		{3003, 1},
 		{3031, 3}
@@ -44,6 +66,10 @@ function playerLogin.onLogin(player)
 		end
 	else
 		player:sendTextMessage(MESSAGE_STATUS, SERVER_MOTD)
+		player:sendTextMessage(MESSAGE_STATUS, "Welcome to " .. SERVER_NAME .. "!")
+		player:sendTextMessage(MESSAGE_BOOSTED_CREATURE, "Remember you can get magical gold converter for free from store and King Tibianus can promote you for free.")
+		player:sendTextMessage(MESSAGE_BOOSTED_CREATURE, "You can always join discord and suggest some changes or report bugs (https://discord.com/invite/vbs3QEmxBm).")
+		player:sendTextMessage(MESSAGE_BOOSTED_CREATURE, "For info about commands use !help.")
 		player:sendTextMessage(MESSAGE_LOGIN, string.format("Your last visit in ".. SERVER_NAME ..": %s.", os.date("%d. %b %Y %X", player:getLastLoginSaved())))
 	end
 
