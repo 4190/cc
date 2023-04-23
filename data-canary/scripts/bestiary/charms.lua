@@ -11,10 +11,7 @@ local charms = {
 		messageCancel = "You wounded the monster.",
 		messageServerLog = "[Wound charm]",
 		effect = CONST_ME_HITAREA,
-		points = 600,
-		sounds = {
-			castSound = SOUND_EFFECT_TYPE_SPELL_BRUTAL_STRIKE
-		}
+		points = 600
 	},
 	-- Enflame charm
 	[2] = {
@@ -28,10 +25,7 @@ local charms = {
 		messageCancel = "You enflamed the monster.",
 		messageServerLog = "[Enflame charm]",
 		effect = CONST_ME_HITBYFIRE,
-		points = 1000,
-		sounds = {
-			castSound = SOUND_EFFECT_TYPE_SPELL_FLAME_STRIKE
-		}
+		points = 1000
 	},
 	-- Poison charm
 	[3] = {
@@ -45,10 +39,7 @@ local charms = {
 		messageCancel = "You poisoned the monster.",
 		messageServerLog = "[Poison charm]",
 		effect = CONST_ME_GREEN_RINGS,
-		points = 600,
-		sounds = {
-			castSound = SOUND_EFFECT_TYPE_SPELL_TERRA_STRIKE
-		}
+		points = 600
 	},
 	-- Freeze charm
 	[4] = {
@@ -62,10 +53,7 @@ local charms = {
 		messageCancel = "You frozen the monster.",
 		messageServerLog = "[Freeze charm]",
 		effect = CONST_ME_ICEATTACK,
-		points = 800,
-		sounds = {
-			castSound = SOUND_EFFECT_TYPE_SPELL_ICE_STRIKE
-		}
+		points = 800
 	},
 	--Zap charm
 	[5] = {
@@ -79,10 +67,7 @@ local charms = {
 		messageCancel = "You eletrocuted the monster.",
 		messageServerLog = "[Zap charm]",
 		effect = CONST_ME_ENERGYHIT,
-		points = 800,
-		sounds = {
-			castSound = SOUND_EFFECT_TYPE_SPELL_ENERGY_STRIKE
-		}
+		points = 800
 	},
 	--Curse charm
 	[6] = {
@@ -96,10 +81,7 @@ local charms = {
 		messageCancel = "You curse the monster.",
 		messageServerLog = "[Curse charm]",
 		effect = CONST_ME_SMALLCLOUDS,
-		points = 900,
-		sounds = {
-			castSound = SOUND_EFFECT_TYPE_SPELL_DEATH_STRIKE
-		}
+		points = 900
 	},
 	-- Cripple charm
 	[7] = {
@@ -168,10 +150,7 @@ local charms = {
 		type = CHARM_PASSIVE,
 		percent = 10,
 		chance = 100,
-		points = 800,
-		sounds = {
-			castSound = SOUND_EFFECT_TYPE_SPELL_BRUTAL_STRIKE
-		}
+		points = 800
 	},
 	-- Scavenge charm
 	[14] = {
@@ -179,10 +158,8 @@ local charms = {
 		description = "Enhances your chances to successfully skin/dust a skinnable/dustable creature.",
 		type = CHARM_PASSIVE,
 		percent = 25,
-		points = 800,
-		sounds = {
-			castSound = SOUND_EFFECT_TYPE_SPELL_BRUTAL_STRIKE
-		}
+		chance = 100,
+		points = 800
 	},
 	-- Gut charm
 	[15] = {
@@ -200,10 +177,7 @@ local charms = {
 		type = CHARM_PASSIVE,
 		percent = 8,
 		chance = 100,
-		points = 2000,
-		sounds = {
-			castSound = SOUND_EFFECT_TYPE_SPELL_BRUTAL_STRIKE
-		}
+		points = 2000
 	},
 	-- Divine wrath charm
 	[17] = {
@@ -217,10 +191,7 @@ local charms = {
 		messageCancel = "You divine the monster.",
 		messageServerLog = "[Divine charm]",
 		effect = CONST_ME_HOLYDAMAGE,
-		points = 1500,
-		sounds = {
-			castSound = SOUND_EFFECT_TYPE_SPELL_HOLY_FLASH
-		}
+		points = 1500
 	},
 	-- Vampiric embrace charm
 	[18] = {
@@ -251,9 +222,6 @@ for charmId, chamsTable in ipairs(charms) do
 	end
 	if chamsTable.description then
 		charmConfig.description = chamsTable.description
-	end
-	if chamsTable.sounds then
-		charmConfig.sounds = chamsTable.sounds
 	end
 	if chamsTable.type then
 		charmConfig.type = chamsTable.type

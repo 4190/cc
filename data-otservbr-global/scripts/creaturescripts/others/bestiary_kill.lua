@@ -8,9 +8,7 @@ function bestiaryOnKill.onKill(player, creature, lastHit)
 	for cid, damage in pairs(creature:getDamageMap()) do
 		local participant = Player(cid)
 		if participant and participant:isPlayer() then
-			participant:addBestiaryKill(creature:getName())
-			participant:addBestiaryKill(creature:getName())
-			participant:addBestiaryKill(creature:getName())
+			participant:addBestiaryKill(creature:getName(), bestiaryMultiplier)
 		end
 	end
 

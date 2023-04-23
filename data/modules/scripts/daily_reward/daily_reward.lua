@@ -117,7 +117,7 @@ DailyReward = {
 			type = DAILY_REWARD_TYPE_PREY_REROLL,
 			systemType = DAILY_REWARD_SYSTEM_TYPE_TWO,
 			freeAccount = 1,
-			premiumAccount = 6
+			premiumAccount = 2
 		},
 		[4] = {
 			type = DAILY_REWARD_TYPE_ITEM,
@@ -129,7 +129,7 @@ DailyReward = {
 			type = DAILY_REWARD_TYPE_PREY_REROLL,
 			systemType = DAILY_REWARD_SYSTEM_TYPE_TWO,
 			freeAccount = 1,
-			premiumAccount = 6
+			premiumAccount = 2
 		},
 		[6] = {
 			type = DAILY_REWARD_TYPE_ITEM,

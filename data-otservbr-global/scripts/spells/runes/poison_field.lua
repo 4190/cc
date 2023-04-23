@@ -12,11 +12,9 @@ end
 
 rune:group("attack")
 rune:name("poison field rune")
-rune:castSound(SOUND_EFFECT_TYPE_SPELL_OR_RUNE)
-rune:impactSound(SOUND_EFFECT_TYPE_SPELL_POISON_FIELD_RUNE)
 rune:runeId(3172)
 rune:allowFarUse(true)
-rune:setPzLocked(false)
+rune:setPzLocked(true)
 rune:charges(3)
 rune:level(14)
 rune:magicLevel(0)

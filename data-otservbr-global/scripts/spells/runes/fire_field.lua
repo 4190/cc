@@ -12,11 +12,9 @@ end
 
 rune:group("attack")
 rune:name("fire field rune")
-rune:castSound(SOUND_EFFECT_TYPE_SPELL_OR_RUNE)
-rune:impactSound(SOUND_EFFECT_TYPE_SPELL_FIRE_FIELD_RUNE)
 rune:runeId(3188)
 rune:allowFarUse(true)
-rune:setPzLocked(false)
+rune:setPzLocked(true)
 rune:charges(3)
 rune:level(15)
 rune:magicLevel(1)

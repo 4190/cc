@@ -1,6 +1,6 @@
 local config = {
 	bossName = "King Zelos",
-	requiredLevel = 8,
+	requiredLevel = 250,
 	timeToFightAgain = 20, -- In hour
 	timeToDefeatBoss = 20, -- In minutes
 	playerPositions = {

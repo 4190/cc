@@ -13,11 +13,9 @@ end
 
 rune:group("attack")
 rune:name("energybomb rune")
-rune:castSound(SOUND_EFFECT_TYPE_SPELL_OR_RUNE)
-rune:impactSound(SOUND_EFFECT_TYPE_SPELL_ENERGY_BOMB_RUNE)
 rune:runeId(3149)
 rune:allowFarUse(true)
-rune:setPzLocked(false)
+rune:setPzLocked(true)
 rune:charges(2)
 rune:level(37)
 rune:magicLevel(10)

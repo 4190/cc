@@ -1,4 +1,4 @@
---[[local combat = Combat()
+local combat = Combat()
 combat:setParameter(COMBAT_PARAM_EFFECT, CONST_ME_MAGIC_GREEN)
 combat:setParameter(COMBAT_PARAM_AGGRESSIVE, false)
 
@@ -24,7 +24,6 @@ spell:name("Protector")
 spell:words("utamo tempo")
 spell:group("support", "focus")
 spell:vocation("knight;true", "elite knight;true")
-spell:castSound(SOUND_EFFECT_TYPE_SPELL_PROTECTOR)
 spell:id(132)
 spell:cooldown(2 * 1000)
 spell:groupCooldown(2 * 1000, 2 * 1000)
@@ -35,4 +34,3 @@ spell:isAggressive(false)
 spell:isPremium(true)
 spell:needLearn(false)
 spell:register()
-]]--

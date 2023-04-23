@@ -25,17 +25,6 @@ registerCharm.description = function(charm, mask)
 	end
 end
 
-registerCharm.sounds = function(charm, mask)
-	if mask.sounds then
-		if mask.sounds.castSound then
-			charm:castSound(mask.sounds.castSound)
-		end
-		if mask.sounds.impactSound then
-			charm:impactSound(mask.sounds.impactSound)
-		end
-	end
-end
-
 registerCharm.type = function(charm, mask)
 	if mask.type then
 		charm:type(mask.type)
