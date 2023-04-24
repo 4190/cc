@@ -44267,7 +44267,7 @@
 		<attribute key="weaponType" value="wand"/>
 		<attribute key="shootType" value="smallearth"/>
 		<attribute key="magicpoints" value="2"/>
-		<attribute key="lifeleechamount" value="1800"/>
+		<attribute key="lifeleechamount" value="18"/>
 		<attribute key="lifeleechchance" value="100"/>
 		<attribute key="range" value="5"/>
 		<attribute key="weight" value="2500"/>
@@ -48964,7 +48964,7 @@
 	<item id="34082" article="a" name="soulcutter">
 		<attribute key="weaponType" value="sword"/>
 		<attribute key="elementdeath" value="45"/>
-		<attribute key="manaleechamount" value="300"/>
+		<attribute key="manaleechamount" value="3"/>
 		<attribute key="manaleechchance" value="100"/>
 		<attribute key="lifeleechamount" value="5"/>
 		<attribute key="lifeleechchance" value="100"/>
@@ -49000,7 +49000,7 @@
 	<item id="34084" article="a" name="soulbiter">
 		<attribute key="weaponType" value="axe"/>
 		<attribute key="elementdeath" value="45"/>
-		<attribute key="manaleechamount" value="300"/>
+		<attribute key="manaleechamount" value="3"/>
 		<attribute key="manaleechchance" value="100"/>
 		<attribute key="lifeleechamount" value="5"/>
 		<attribute key="lifeleechchance" value="100"/>
@@ -49036,7 +49036,7 @@
 	<item id="34086" article="a" name="soulcrusher">
 		<attribute key="weaponType" value="club"/>
 		<attribute key="elementice" value="46"/>
-		<attribute key="manaleechamount" value="300"/>
+		<attribute key="manaleechamount" value="3"/>
 		<attribute key="manaleechchance" value="100"/>
 		<attribute key="lifeleechamount" value="5"/>
 		<attribute key="lifeleechchance" value="100"/>
@@ -49129,7 +49129,7 @@
 		<attribute key="shootType" value="smallice"/>
 		<attribute key="absorbpercentice" value="12"/>
 		<attribute key="magicpoints" value="5"/>
-		<attribute key="manaleechamount" value="300"/>
+		<attribute key="manaleechamount" value="3"/>
 		<attribute key="manaleechchance" value="100"/>
 		<attribute key="lifeleechamount" value="5"/>
 		<attribute key="lifeleechchance" value="100"/>
@@ -49449,7 +49449,7 @@
 		<attribute key="weaponType" value="wand"/>
 		<attribute key="shootType" value="smallice"/>
 		<attribute key="magicpoints" value="2"/>
-		<attribute key="lifeleechamount" value="1800"/>
+		<attribute key="lifeleechamount" value="18"/>
 		<attribute key="lifeleechchance" value="100"/>
 		<attribute key="range" value="4"/>
 		<attribute key="weight" value="2100"/>
@@ -54539,7 +54539,7 @@
 		<!--attribute key="firemagiclevelpoints" value="1"/-->
 		<!--attribute key="energymagiclevelpoints" value="1"/-->
 		<attribute key="magicpoints" value="2"/>
-		<attribute key="manaleechamount" value="100"/>
+		<attribute key="manaleechamount" value="1"/>
 		<attribute key="manaleechchance" value="100"/>
 		<attribute key="transformDeEquipTo" value="39183"/>>
 		<attribute key="showduration" value="1" />
@@ -54572,7 +54572,7 @@
 		<attribute key="absorbpercentice" value="4"/>
 		<!--attribute key="healingmagiclevelpoints" value="2"/-->
 		<attribute key="magicpoints" value="2"/>
-		<attribute key="manaleechamount" value="100"/>
+		<attribute key="manaleechamount" value="1"/>
 		<attribute key="manaleechchance" value="100"/>
 		<attribute key="transformDeEquipTo" value="39186"/>
 		<attribute key="showattributes" value="1" />
