@@ -15,15 +15,6 @@ function playersOnline.onSay(player, words, param)
 	local playersOnlineList = #onlineList
 	player:sendTextMessage(MESSAGE_ATTENTION, ("%d players online!"):format(playersOnlineList))
 
-	local listPlayers
-	for i = 1, playersOnlineList, maxPlayersPerMessage do
-		local j = math.min(i + maxPlayersPerMessage - 1, playersOnlineList)
-		local msg = table.concat(onlineList, ", ", i, j) .. "."
-		listPlayers = table.concat(onlineList, "\n", i, j)
-		player:sendTextMessage(MESSAGE_ATTENTION, msg)
-	end
-
-	player:popupFYI("~ Players Online ~\n\n" .. listPlayers)
 	return false
 end
 
