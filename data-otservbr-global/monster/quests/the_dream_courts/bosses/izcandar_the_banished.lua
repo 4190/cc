@@ -85,8 +85,24 @@ monster.loot = {
 }
 
 monster.attacks = {
-	{name ="melee", interval = 2000, chance = 100, minDamage = 0, maxDamage = -5}
+	{name ="melee", interval = 2000, chance = 100, minDamage = 0, maxDamage = -1000},
+	{name ="combat", interval = 2000, chance = 10, type = COMBAT_FIREDAMAGE, minDamage = -400, maxDamage = -1000, length = 5, spread = 3, effect = CONST_ME_FIREAREA, target = false},
+	{name ="combat", interval = 2000, chance = 10, type = COMBAT_FIREDAMAGE, minDamage = -400, maxDamage = -1000, length = 5, spread = 0, effect = CONST_ME_FIREAREA, target = false},
+	{name ="combat", interval = 2000, chance = 10, type = COMBAT_ICEDAMAGE, minDamage = -400, maxDamage = -1000, length = 5, spread = 3, effect = CONST_ME_ICEAREA, target = false},
+	{name ="combat", interval = 2000, chance = 10, type = COMBAT_ICEDAMAGE, minDamage = -400, maxDamage = -1000, length = 5, spread = 0, effect = CONST_ME_ICEAREA, target = false},
+
 }
+
+
+Physical Damage Melee (0-500?)
+⁠, Fire Damage Fire Beam (500-1000?)
+⁠, Fire Damage Fire Wave (500-1000?)
+. Physical Damage Melee (0-500?)
+⁠, Ice Damage Ice Beam (500-1000?)
+⁠, Ice Damage Ice Wave (500-1000?)
+. 
+
+
 
 monster.defenses = {
 	defense = 0,
