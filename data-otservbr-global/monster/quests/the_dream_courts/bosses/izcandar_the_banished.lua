@@ -93,17 +93,6 @@ monster.attacks = {
 
 }
 
-
-Physical Damage Melee (0-500?)
-⁠, Fire Damage Fire Beam (500-1000?)
-⁠, Fire Damage Fire Wave (500-1000?)
-. Physical Damage Melee (0-500?)
-⁠, Ice Damage Ice Beam (500-1000?)
-⁠, Ice Damage Ice Wave (500-1000?)
-. 
-
-
-
 monster.defenses = {
 	defense = 0,
 	armor = 76
